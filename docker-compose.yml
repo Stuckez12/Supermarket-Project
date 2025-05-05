@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:17 
+    container_name: db
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    networks:
+      - pg-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+        POSTGRES_DB: ${DATABASE_NAME}
+        POSTGRES_USER: ${DATABASE_USERNAME}
+        POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        POSTGRES_PORT: ${DATABASE_PORT}
+    env_file: .env
+    attach: false
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pg-admin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - pg-network
+    attach: false
+
+  account-service:
+    build:
+        context: .
+        dockerfile: src/backend_services/account/Dockerfile
+    container_name: account-service
+    ports:
+      - ${ACCOUNT_PORT}:${ACCOUNT_PORT}
+    networks:
+      - pg-network
+    depends_on:
+      - db
+    env_file: .env
+    attach: false
+
+networks:
+  pg-network:
+
+volumes:
+  postgres_data:
