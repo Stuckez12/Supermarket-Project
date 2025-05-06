@@ -4,7 +4,15 @@ from concurrent import futures
 
 from src.backend_services.account.database.database import engine, Base, database_initialization
 
+from src.backend_services.account.authentication.login import UserAuthentication_Service
+
+from src.backend_services.common.proto import user_login_pb2, user_login_pb2_grpc
+
 os.environ["GRPC_DNS_RESOLVER"] = "native"
+
+def add_services(server):
+    user_login_pb2_grpc.add_UserAuthServiceServicer_to_server(UserAuthentication_Service(), server)
+    print('Service Added: User-Authentication')
 
 
 def serve():
@@ -20,6 +28,8 @@ def serve():
 
     database_initialization()
     Base.metadata.create_all(engine)
+
+    add_services(server)
 
     server.wait_for_termination()
 

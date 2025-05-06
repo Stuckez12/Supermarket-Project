@@ -1,0 +1,15 @@
+syntax = "proto3";
+package common;
+
+// HTTP_Response is the basic response for every HTTP request a user or API performs
+message HTTP_Response
+{
+    // success is boolean response that is returned stating if the request was successful or had failed
+    bool success = 1;
+    // http_status displays the relevant code regarding the success of the specified request made
+    int32 http_status = 2;
+    // message is a short summary of the response
+    string message = 3;
+    // error contains all the error messages that may occur when performing the specified request
+    repeated string error = 4;
+}

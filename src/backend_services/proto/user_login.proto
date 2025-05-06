@@ -1,0 +1,48 @@
+syntax = "proto3";
+package user_login;
+
+import "input_output_messages.proto";
+
+
+// UserRegistrationRequest
+message UserRegistrationRequest {
+    // email
+    string email = 1;
+    // password
+    string password = 2;
+    // first_name
+    string first_name = 3;
+    // last_name
+    string last_name = 4;
+    // gender
+    string gender = 5;
+    // date_of_birth
+    int32 date_of_birth = 6;
+}
+
+// UserRegistrationResponse is the basic response for every HTTP request a user or API performs
+message UserRegistrationResponse {
+    // success is boolean response that is returned stating if the request was successful or had failed
+    common.HTTP_Response status = 1;
+}
+
+// UserLoginRequest
+message UserLoginRequest {
+    // email
+    string email = 1;
+    // password
+    string password = 2;
+}
+
+// UserLoginResponse is the basic response for every HTTP request a user or API performs
+message UserLoginResponse {
+    // success is boolean response that is returned stating if the request was successful or had failed
+    common.HTTP_Response status = 1;
+}
+
+service UserAuthService {
+    // UserRegistration
+    rpc UserRegistration(UserRegistrationRequest) returns (UserRegistrationResponse) {}
+    // UserLogin
+    rpc UserLogin(UserLoginRequest) returns (UserLoginResponse) {}
+}

@@ -34,5 +34,5 @@ USER appuser
 
 EXPOSE 50050
 
-ENV PYTHONPATH=/app/backend/common/proto
+ENV PYTHONPATH=/app/src/backend_services/common/proto
 CMD ["python", "-m", "src.backend_services.account.server"]

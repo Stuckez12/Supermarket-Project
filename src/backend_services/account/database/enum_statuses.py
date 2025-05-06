@@ -13,3 +13,9 @@ USER_STATUS_ENUM = Enum('Active', 'Inactive', 'Terminated', 'Unverified', 'Locke
 # GENDER_ENUM contains all of the genders a user can have
 # - All statuses are self explanatory
 GENDER_ENUM = Enum('Male', 'Female', 'Other', 'Prefer Not To Say', name='gender_enum')
+
+# ROLE_ENUM contains all of the different roles a user browsing the website can be assigned (only one)
+# - Customer: Regular user who browses and shops online
+# - Moderator: Monitors comments and can enforce online policy
+# - Admin: Monitors the website and all details surrounding the functionality
+ROLE_ENUM = Enum('Customer', 'Moderator', 'Admin', name='role_enum')
