@@ -1,0 +1,30 @@
+name: Python Code Quality Test
+on:
+  pull_request:
+  
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install mariadb
+        run: sudo apt install libmariadb-dev
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-compile -r requirements.txt
+          pip install pylint
+          pip install flake8
+      - name: Run pylint
+        run: |
+          pylint $(git ls-files '*.py')
+      - name: Run flake8
+        run: |
+          flake8 --max-complexity 10 $(git ls-files '*.py')
+      - name: Custom Code Quality
+        run: |
+          python .github/workflows/code_quality/main.py
