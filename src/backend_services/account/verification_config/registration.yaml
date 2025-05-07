@@ -1,0 +1,62 @@
+registration:
+  email:
+    type: str
+    data: None
+    restrictions:
+      min_len: 6
+      max_len: 320
+      lower_case: 'DEFAULT'
+      upper_case: 'DEFAULT'
+      numbers: 'DEFAULT'
+      symbols: 'MUST'
+      email: 'MUST'
+  password:
+    type: str
+    data: None
+    restrictions:
+      min_len: 8
+      max_len: 96
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'MUST'
+      symbols: 'DEFAULT'
+      email: 'DEFAULT'
+  first_name:
+    type: str
+    data: None
+    restrictions:
+        min_len: 2
+        max_len: 48
+        lower_case: 'MUST'
+        upper_case: 'MUST'
+        numbers: 'NONE'
+        symbols: 'DEFAULT'
+        email: 'NONE'
+  last_name:
+    type: str
+    data: None
+    restrictions:
+      min_len: 2
+      max_len: 48
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'NONE'
+      symbols: 'DEFAULT'
+      email: 'NONE'
+  gender: 
+    type: str
+    data: None
+    restrictions:
+      min_len: 4
+      max_len: 20
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'NONE'
+      symbols: 'NONE'
+      email: 'NONE'
+  date_of_birth:
+    type: int
+    data: None
+    restrictions:
+      min_num: 10
+      max_num: 10

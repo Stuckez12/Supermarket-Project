@@ -20,10 +20,42 @@ message UserRegistrationRequest {
     int32 date_of_birth = 6;
 }
 
-// UserRegistrationResponse is the basic response for every HTTP request a user or API performs
+//
+message UserData {
+    // uuid
+    string uuid = 1;
+    // email
+    string email = 2;
+    // password_last_changed_at
+    string password_last_changed_at = 3;
+    // first_name
+    string first_name = 4;
+    // last_name
+    string last_name = 5;
+    // gender
+    string gender = 6;
+    // date_of_birth
+    string date_of_birth = 7;
+    // created_at
+    string created_at = 8;
+    // updated_at
+    string updated_at = 9;
+    // last_login
+    string last_login = 10;
+    // email_verified
+    string email_verified = 11;
+    // user_status
+    string user_status = 12;
+    // user_role
+    string user_role = 13;
+}
+
+// UserRegistrationResponse
 message UserRegistrationResponse {
     // success is boolean response that is returned stating if the request was successful or had failed
     common.HTTP_Response status = 1;
+    // user contains all the relevant data that can be safely passed to the frontend
+    UserData user = 2;
 }
 
 // UserLoginRequest
@@ -34,10 +66,12 @@ message UserLoginRequest {
     string password = 2;
 }
 
-// UserLoginResponse is the basic response for every HTTP request a user or API performs
+// UserLoginResponse
 message UserLoginResponse {
     // success is boolean response that is returned stating if the request was successful or had failed
     common.HTTP_Response status = 1;
+    // user contains all the relevant data that can be safely passed to the frontend
+    UserData user = 2;
 }
 
 service UserAuthService {

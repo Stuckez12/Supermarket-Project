@@ -141,7 +141,7 @@ class DataVerification():
         return data_errors
 
 
-    def verify_data(cls: any, data: dict) -> any:
+    def verify_data(cls: any, data: dict) -> tuple[bool, list]:
         '''
         This function recieves nested dictionaries containing the
         variables and the expected data type and restrictions for
@@ -382,6 +382,9 @@ class DataVerification():
         data_type, rest_errors = cls.set_data_type_restriction(name, restrictions, [int, float], rest_errors)
         min_num, rest_errors = cls.set_min_restriction(name, min_num, restrictions, rest_errors)
         max_num, rest_errors = cls.set_max_restriction(name, max_num, restrictions, rest_errors)
+
+        print("Min: " + min_num)
+        print("Max: " + max_num)
 
         if data_type.__name__ == 'float':
             try:

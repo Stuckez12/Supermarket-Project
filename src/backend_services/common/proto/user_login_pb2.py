@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 import input_output_messages_pb2 as input__output__messages__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10user_login.proto\x12\nuser_login\x1a\x1binput_output_messages.proto\"\x88\x01\n\x17UserRegistrationRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x11\n\tlast_name\x18\x04 \x01(\t\x12\x0e\n\x06gender\x18\x05 \x01(\t\x12\x15\n\rdate_of_birth\x18\x06 \x01(\x05\"A\n\x18UserRegistrationResponse\x12%\n\x06status\x18\x01 \x01(\x0b\x32\x15.common.HTTP_Response\"3\n\x10UserLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\":\n\x11UserLoginResponse\x12%\n\x06status\x18\x01 \x01(\x0b\x32\x15.common.HTTP_Response2\xbe\x01\n\x0fUserAuthService\x12_\n\x10UserRegistration\x12#.user_login.UserRegistrationRequest\x1a$.user_login.UserRegistrationResponse\"\x00\x12J\n\tUserLogin\x12\x1c.user_login.UserLoginRequest\x1a\x1d.user_login.UserLoginResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10user_login.proto\x12\nuser_login\x1a\x1binput_output_messages.proto\"\x88\x01\n\x17UserRegistrationRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x11\n\tlast_name\x18\x04 \x01(\t\x12\x0e\n\x06gender\x18\x05 \x01(\t\x12\x15\n\rdate_of_birth\x18\x06 \x01(\x05\"\x93\x02\n\x08UserData\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12 \n\x18password_last_changed_at\x18\x03 \x01(\t\x12\x12\n\nfirst_name\x18\x04 \x01(\t\x12\x11\n\tlast_name\x18\x05 \x01(\t\x12\x0e\n\x06gender\x18\x06 \x01(\t\x12\x15\n\rdate_of_birth\x18\x07 \x01(\t\x12\x12\n\ncreated_at\x18\x08 \x01(\t\x12\x12\n\nupdated_at\x18\t \x01(\t\x12\x12\n\nlast_login\x18\n \x01(\t\x12\x16\n\x0e\x65mail_verified\x18\x0b \x01(\t\x12\x13\n\x0buser_status\x18\x0c \x01(\t\x12\x11\n\tuser_role\x18\r \x01(\t\"e\n\x18UserRegistrationResponse\x12%\n\x06status\x18\x01 \x01(\x0b\x32\x15.common.HTTP_Response\x12\"\n\x04user\x18\x02 \x01(\x0b\x32\x14.user_login.UserData\"3\n\x10UserLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"^\n\x11UserLoginResponse\x12%\n\x06status\x18\x01 \x01(\x0b\x32\x15.common.HTTP_Response\x12\"\n\x04user\x18\x02 \x01(\x0b\x32\x14.user_login.UserData2\xbe\x01\n\x0fUserAuthService\x12_\n\x10UserRegistration\x12#.user_login.UserRegistrationRequest\x1a$.user_login.UserRegistrationResponse\"\x00\x12J\n\tUserLogin\x12\x1c.user_login.UserLoginRequest\x1a\x1d.user_login.UserLoginResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,12 +34,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_USERREGISTRATIONREQUEST']._serialized_start=62
   _globals['_USERREGISTRATIONREQUEST']._serialized_end=198
-  _globals['_USERREGISTRATIONRESPONSE']._serialized_start=200
-  _globals['_USERREGISTRATIONRESPONSE']._serialized_end=265
-  _globals['_USERLOGINREQUEST']._serialized_start=267
-  _globals['_USERLOGINREQUEST']._serialized_end=318
-  _globals['_USERLOGINRESPONSE']._serialized_start=320
-  _globals['_USERLOGINRESPONSE']._serialized_end=378
-  _globals['_USERAUTHSERVICE']._serialized_start=381
-  _globals['_USERAUTHSERVICE']._serialized_end=571
+  _globals['_USERDATA']._serialized_start=201
+  _globals['_USERDATA']._serialized_end=476
+  _globals['_USERREGISTRATIONRESPONSE']._serialized_start=478
+  _globals['_USERREGISTRATIONRESPONSE']._serialized_end=579
+  _globals['_USERLOGINREQUEST']._serialized_start=581
+  _globals['_USERLOGINREQUEST']._serialized_end=632
+  _globals['_USERLOGINRESPONSE']._serialized_start=634
+  _globals['_USERLOGINRESPONSE']._serialized_end=728
+  _globals['_USERAUTHSERVICE']._serialized_start=731
+  _globals['_USERAUTHSERVICE']._serialized_end=921
 # @@protoc_insertion_point(module_scope)
