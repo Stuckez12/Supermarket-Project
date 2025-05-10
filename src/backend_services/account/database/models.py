@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Boolean, DateTime, Date, Text, Integer
 from src.backend_services.account.database.database import Base
 from datetime import datetime, UTC
 
-from src.backend_services.account.database.enum_statuses import USER_STATUS_ENUM, GENDER_ENUM, ROLE_ENUM
+from backend_services.account.database.db_enum_statuses import USER_STATUS_ENUM, GENDER_ENUM, ROLE_ENUM
 
 
 class User(Base):

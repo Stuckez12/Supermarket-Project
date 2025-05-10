@@ -1,15 +1,12 @@
-registration:
-  email:
-    type: str
+auth:
+  uuid:
+    type: str_uuid
     data: None
-    restrictions:
-      min_len: 6
-      max_len: 320
-      lower_case: 'DEFAULT'
-      upper_case: 'DEFAULT'
-      numbers: 'DEFAULT'
-      symbols: 'MUST'
-      email: 'MUST'
+    check: False
+  email:
+    type: email
+    data: None
+    check: False
   password:
     type: str
     data: None
@@ -20,7 +17,6 @@ registration:
       upper_case: 'MUST'
       numbers: 'MUST'
       symbols: 'DEFAULT'
-      email: 'DEFAULT'
   first_name:
     type: str
     data: None
@@ -31,7 +27,6 @@ registration:
         upper_case: 'MUST'
         numbers: 'NONE'
         symbols: 'DEFAULT'
-        email: 'NONE'
   last_name:
     type: str
     data: None
@@ -42,8 +37,7 @@ registration:
       upper_case: 'MUST'
       numbers: 'NONE'
       symbols: 'DEFAULT'
-      email: 'NONE'
-  gender: 
+  gender:
     type: str
     data: None
     restrictions:
@@ -53,10 +47,16 @@ registration:
       upper_case: 'MUST'
       numbers: 'NONE'
       symbols: 'NONE'
-      email: 'NONE'
   date_of_birth:
-    type: int
+    type: unix
     data: None
     restrictions:
-      min_num: 10
-      max_num: 10
+      allow_past: 'TRUE'
+      min_time:
+        past: 'TRUE'
+        format: 'YEARS'
+        value: 12
+      max_time:
+        past: 'TRUE'
+        format: 'YEARS'
+        value: 30
