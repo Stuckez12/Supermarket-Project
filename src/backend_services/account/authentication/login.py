@@ -1,25 +1,23 @@
 import grpc
 
+from src.backend_services.account.database.database import get_db_conn
+from src.backend_services.account.database.models import User
+
 from src.backend_services.common.proto.input_output_messages_pb2 import HTTP_Response
 from src.backend_services.common.proto import user_login_pb2, user_login_pb2_grpc
 from src.backend_services.common.utils.data_verification import DataVerification
-from src.backend_services.common.utils.schema import load_yaml_file_as_dict, insert_data_into_schema, format_schema_data_types
+from src.backend_services.common.utils.schema import load_yaml_file_as_dict, get_verification_schema
 
 
 # Global file variables
-REGISTRATION_VERIFY_CONFIG = None
-LOGIN_VERIFY_CONFIG = None
-
+AUTH_VERIFY_CONFIG = None
 
 
 def initialise_file():
-    global REGISTRATION_VERIFY_CONFIG
-    global LOGIN_VERIFY_CONFIG
+    schemas = load_yaml_file_as_dict("src/backend_services/account/verification_config/user_auth.yaml")
 
-    schemas = load_yaml_file_as_dict("src/backend_services/account/verification_config/registration.yaml")
-
-    REGISTRATION_VERIFY_CONFIG = schemas['registration']
-    LOGIN_VERIFY_CONFIG = None
+    global AUTH_VERIFY_CONFIG
+    AUTH_VERIFY_CONFIG = schemas['auth']
 
 initialise_file()
 
@@ -56,11 +54,16 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             'date_of_birth': request.date_of_birth,
         }
 
-        schema = insert_data_into_schema(REGISTRATION_VERIFY_CONFIG, data)
-        schema = format_schema_data_types(schema, to_string=False)
+        success, message, schema = get_verification_schema(AUTH_VERIFY_CONFIG, data)
 
-        verify = DataVerification()
-        success, errors = verify.verify_data(schema)
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = message
+
+            return user_login_pb2.UserRegistrationResponse(status=return_status)
+
+        success, errors = DataVerification().verify_data(schema)
 
         if not success:
             return_status.success = False
@@ -70,9 +73,10 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
 
             return user_login_pb2.UserRegistrationResponse(status=return_status)
 
-        
+        with get_db_conn() as session:
+            #user_result = session.query(User)
 
-        return user_login_pb2.UserRegistrationResponse(status=return_status)
+            return user_login_pb2.UserRegistrationResponse(status=return_status)
 
 
     def UserLogin(self, request: user_login_pb2.UserLoginRequest, context: grpc.ServicerContext) -> user_login_pb2.UserLoginResponse:
