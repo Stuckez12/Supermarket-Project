@@ -1,3 +1,7 @@
+import dns.resolver
+import uuid
+
+from datetime import datetime, timezone
 from enum import Enum
 from math import inf as INFINITY
 
@@ -6,6 +10,50 @@ from math import inf as INFINITY
 class CharReqEnum(Enum):
     MUST = 'MUST'
     DEFAULT = 'DEFAULT'
+    NONE = 'NONE'
+
+
+    @classmethod
+    def from_name(cls, name):
+        return cls.members.get(name.upper())
+
+
+    @classmethod
+    def from_value(cls, value):
+        for member in cls:
+            if member.value == value:
+                return member
+
+        return None
+    
+
+# May be moved to seperate file
+class UnixNumberFormatEnum(Enum):
+    SECONDS = 'SECONDS'
+    MINUTES = 'MINUTES'
+    HOURS = 'HOURS'
+    DAYS = 'DAYS'
+    YEARS = 'YEARS'
+
+
+    @classmethod
+    def from_name(cls, name):
+        return cls.members.get(name.upper())
+
+
+    @classmethod
+    def from_value(cls, value):
+        for member in cls:
+            if member.value == value:
+                return member
+
+        return None
+    
+
+# May be moved to seperate file
+class NullBooleanEnum(Enum):
+    TRUE = 'TRUE'
+    FALSE = 'FALSE'
     NONE = 'NONE'
 
 
@@ -36,30 +84,30 @@ class DataVerification():
 
     def set_min_restriction(cls, name, data, restrictions, rest_errors):
         '''
-        This function sets the minimum length a variable can be.  
+        This function sets the minimum size a number can be.  
         '''
 
-        if 'min_len' in restrictions:
-            if restrictions['min_len'] > 0:
-                return restrictions['min_len'], rest_errors
+        if 'min_num' in restrictions:
+            if restrictions['min_num'] > 0:
+                return restrictions['min_num'], rest_errors
 
             else:
-                rest_errors.append(f'DEV ERROR: {name}-restriction-min_len is invalid. min_len must be a positive int')
+                rest_errors.append(f'DEV ERROR: {name}-restriction-min_num is invalid. min_num must be a positive int')
 
         return data, rest_errors
 
     
     def set_max_restriction(cls, name, data, restrictions, rest_errors):
         '''
-        This function sets the maximum length a variable can be. 
+        This function sets the maximum size a number can be. 
         '''
 
-        if 'max_len' in restrictions:
-            if restrictions['max_len'] > 0:
-                return restrictions['max_len'], rest_errors
+        if 'max_num' in restrictions:
+            if restrictions['max_num'] > 0:
+                return restrictions['max_num'], rest_errors
 
             else:
-                rest_errors.append(f'DEV ERROR: {name}-restriction-max_len is invalid. max_len must be a positive int')
+                rest_errors.append(f'DEV ERROR: {name}-restriction-max_num is invalid. max_num must be a positive int')
 
         return data, rest_errors
 
@@ -122,25 +170,6 @@ class DataVerification():
         return data_errors
 
 
-    def validate_email_requirement(cls, data, requirement, name, data_errors):
-        '''
-        This custom function checks whether the character '@'
-        is present within a string.
-        It uses the CharReqEnum state to check whether it
-        should be present in the string or not included.
-        '''
-
-        has_at = '@' in data
-
-        if has_at and requirement == CharReqEnum.NONE:
-            data_errors.append(f'{name} must not contain \'@\'')
-
-        elif not has_at and requirement == CharReqEnum.MUST:
-            data_errors.append(f'{name} must contain \'@\'')
-
-        return data_errors
-
-
     def verify_data(cls: any, data: dict) -> tuple[bool, list]:
         '''
         This function recieves nested dictionaries containing the
@@ -153,6 +182,7 @@ class DataVerification():
             variable_name: {
                 type: str,
                 data: "hello",
+                check: True,
                 restrictions: {
                     min_len: 4,
                     max_len: 8,
@@ -184,10 +214,14 @@ class DataVerification():
         total_errors = []
 
         for variable, data_points in data.items():
+            if not data_points['check']:
+                continue
+
             success = True
             errors = []
 
             data = data_points['data']
+            restrictions = {}
 
             if 'restrictions' in data_points:
                 restrictions = data_points['restrictions']
@@ -198,6 +232,15 @@ class DataVerification():
             elif data_points['type'] in [int, float]:
                 restrictions['type'] = data_points['type']
                 success, errors = cls.verify_number_data(variable, data, restrictions)
+
+            elif data_points['type'] == 'email':
+                success, errors = cls.verify_email_data(variable, data)
+
+            elif data_points['type'] == 'str_uuid':
+                success, errors = cls.verify_uuid4_string(variable, data)
+
+            elif data_points['type'] == 'unix':
+                success, errors = cls.verify_unix(variable, data, restrictions)
 
             if len(errors) != 0 and not success:
                 total_errors += errors
@@ -223,7 +266,7 @@ class DataVerification():
         restrictions = {
             min_len: 12,
             upper_case: "MUST",
-            email: "DEFAULT"
+            symbols: "MUST"
         }
 
         Available Restrictions:
@@ -257,11 +300,6 @@ class DataVerification():
             - Accepts the `CharacterRequirementStatus` Enum.
             - Determines if special symbols are required in the string.
 
-        - **email (str)**: 
-            - DEFAULT = "DEFAULT"
-            - Accepts the `CharacterRequirementStatus` Enum.
-            - Determines whether the string must contain an "@" character (used for email validation).
-
 
         `CharacterRequirementStatus` Enum:
         - **MUST**: 
@@ -285,7 +323,7 @@ class DataVerification():
         '''
 
         if type(data) != str:
-            return False, [f'{name} type is invalid. Expected str but recieved {type(data).__name__}']
+            return False, [f'{name} type is invalid. Expected str but received {type(data).__name__}']
         
         # Default Restrictions
         min_len = 0
@@ -294,7 +332,6 @@ class DataVerification():
         upper_case = CharReqEnum.DEFAULT
         numbers = CharReqEnum.DEFAULT
         symbols = CharReqEnum.DEFAULT
-        email = CharReqEnum.DEFAULT
 
         rest_errors = []
 
@@ -305,7 +342,6 @@ class DataVerification():
         upper_case, rest_errors = cls.set_enum_restriction(name, CharReqEnum, restrictions, 'upper_case', rest_errors)
         numbers, rest_errors = cls.set_enum_restriction(name, CharReqEnum, restrictions, 'numbers', rest_errors)
         symbols, rest_errors = cls.set_enum_restriction(name, CharReqEnum, restrictions, 'symbols', rest_errors)
-        email, rest_errors = cls.set_enum_restriction(name, CharReqEnum, restrictions, 'email', rest_errors)
 
         if max_len < min_len:
             rest_errors.append(f'DEV ERROR: {name}-restriction-len_limits is invalid. max_len must be >= min_len')
@@ -324,14 +360,10 @@ class DataVerification():
         if data_len > max_len:
             data_errors.append(f'{name} string length of {data_len} is too long. Maximum expected length is {max_len} characters')
 
-        def is_symbol(char):
-            return not char.isalnum() and char != '@'
-
         data_errors = cls.validate_char_requirement(data, str.islower, lower_case, name, 'lower_case', data_errors)
         data_errors = cls.validate_char_requirement(data, str.isupper, upper_case, name, 'upper_case', data_errors)
         data_errors = cls.validate_char_requirement(data, str.isdigit, numbers,    name, 'number',     data_errors)
-        data_errors = cls.validate_char_requirement(data, is_symbol,   symbols,    name, 'symbol',     data_errors)
-        data_errors = cls.validate_email_requirement(data, email, name, data_errors)
+        data_errors = cls.validate_char_requirement(data, lambda c: not c.isalnum(), symbols,    name, 'symbol',     data_errors)
 
         if len(data_errors) != 0:
             return False, data_errors
@@ -383,18 +415,15 @@ class DataVerification():
         min_num, rest_errors = cls.set_min_restriction(name, min_num, restrictions, rest_errors)
         max_num, rest_errors = cls.set_max_restriction(name, max_num, restrictions, rest_errors)
 
-        print("Min: " + min_num)
-        print("Max: " + max_num)
-
         if data_type.__name__ == 'float':
             try:
                 data = float(data)
 
             except:
-                return False, [f'{name} type is invalid. Expected {data_type.__name__} but recieved {type(data).__name__}']
+                return False, [f'{name} type is invalid. Expected {data_type.__name__} but received {type(data).__name__}']
 
         if type(data).__name__ != data_type.__name__:
-            return False, [f'{name} type is invalid. Expected {data_type.__name__} but recieved {type(data).__name__}']
+            return False, [f'{name} type is invalid. Expected {data_type.__name__} but received {type(data).__name__}']
 
         if max_num < min_num:
             rest_errors.append(f'DEV ERROR: {name}-restriction-len_limits is invalid. max_num must be >= min_num')
@@ -409,9 +438,255 @@ class DataVerification():
             data_errors.append(f'{name} integer {data} is too small. Minimum expected number is {min_num}')
 
         if data > max_num:
-            data_errors.append(f'{name} integer {data} is too large. Maximum expected number is {max_len}')
+            data_errors.append(f'{name} integer {data} is too large. Maximum expected number is {max_num}')
 
         if len(data_errors) != 0:
             return False, data_errors
+
+        return True, []
+
+
+    def verify_email_data(cls, name, data):
+        '''
+        
+        '''
+
+        if type(data) != str:
+            return False, [f'{name} type is invalid. Expected str but received {type(data).__name__}']
+
+        if data.count('@') != 1:
+            return False, [f'{name} is invalid. Email must only contain one @']
+
+        email_parts = data.split('@')
+        success, errors = cls.verify_string_data('Email', email_parts[0], { 'min_len': 1, 'max_len': 63 })
+
+        if not success:
+            return False, errors
+
+        try:
+            dns.resolver.resolve(email_parts[1], 'MX')
+
+        except dns.resolver.NoAnswer:
+            return False, [f'{name} was unable to be verified']
+
+        except dns.resolver.NXDOMAIN:
+            return False, [f'{name} has an invalid domain']
+
+        return True, []
+
+
+    def verify_uuid4_string(cls, name, data):
+        '''
+        
+        '''
+
+        if type(data) != str:
+            return False, [f'{name} type is invalid. Expected str but received {type(data).__name__}']
+        
+        uuid_len = len(data)
+
+        if uuid_len != 36:
+            return False, [f'uuid {name} length is not 36']
+        
+        if not(data[8] == data[13] == data[18] == data[23] == '-') or data.count('-') != 4:
+            return False, [f'uuid {name} incorrectly formatted']
+
+        if not data[14] == '4':
+            return False, [f'uuid {name} received version uuid{data[14]}. Expected version uuid4']
+
+        if not data[19] in ['8','9','a','b']:
+            return False, [f'uuid {name} variant invalid']
+        
+        try:
+            uuid.UUID(data, version=4)
+
+        except ValueError:
+            return False, [f'uuid {name} unable to convert to uuid']
+        
+        finally:
+            return True, []
+
+
+    def verify_unix(cls, name, data, restrictions={}):
+        '''
+        restrictions:
+            allow_future
+            allow_past
+            min_time
+            - current_time (overrides all below restrictions for min_time)
+            - future
+            - past
+            - format
+            - value
+            max_time
+            - future
+            - past
+            - format
+            - value
+        '''
+
+        def convert_unix_restr_to_limit(time_dir, format, value):
+            '''
+            
+            '''
+
+            multiplier = 0
+            current_time = int(datetime.now(timezone.utc).timestamp())
+
+            if format == UnixNumberFormatEnum.SECONDS:
+                multiplier = 1
+
+            elif format == UnixNumberFormatEnum.MINUTES:
+                multiplier = 60
+
+            elif format == UnixNumberFormatEnum.HOURS:
+                multiplier = 60 * 60
+
+            elif format == UnixNumberFormatEnum.DAYS:
+                multiplier = 60 * 60 * 24
+
+            elif format == UnixNumberFormatEnum.YEARS:
+                multiplier = round(60 * 60 * 24 * 365.25)
+
+            return current_time + ((value * multiplier) * time_dir)
+
+        if type(data) != int:
+            return False, [f'{name} type is invalid. Expected int but received {type(data).__name__}']
+
+
+        current_time = int(datetime.now(timezone.utc).timestamp())
+        
+        min_time = current_time
+        max_time = current_time
+        
+        allow_future = NullBooleanEnum.FALSE
+        allow_past = NullBooleanEnum.FALSE
+
+        if 'allow_future' in restrictions:
+            allow_future = NullBooleanEnum.from_value(restrictions['allow_future'])
+
+        if 'allow_past' in restrictions:
+            allow_past = NullBooleanEnum.from_value(restrictions['allow_past'])
+
+        if None in [allow_future, allow_past]:
+            return False, [f'DEV ERROR: Invalid Enum Value Provided']
+        
+        if allow_future == allow_past == NullBooleanEnum.FALSE:
+            return False, [f'DEV ERROR: Filter must allow either past or future']
+
+        if allow_future == NullBooleanEnum.FALSE:
+            if data > current_time:
+                return False, [f'{name} unix time cannot be set in the future']
+            
+        elif allow_future == NullBooleanEnum.TRUE:
+            max_time = INFINITY
+            
+        if allow_past == NullBooleanEnum.FALSE:
+            if data < current_time:
+                return False, [f'{name} unix time cannot be set in the past']
+        
+        elif allow_past == NullBooleanEnum.TRUE:
+            max_time = 0
+
+        min_current_time = False
+        min_future = NullBooleanEnum.NONE
+        min_past = NullBooleanEnum.NONE
+        min_format = UnixNumberFormatEnum.SECONDS
+        min_value = 0
+
+        max_future = NullBooleanEnum.NONE
+        max_past = NullBooleanEnum.NONE
+        max_format = UnixNumberFormatEnum.SECONDS
+        max_value = INFINITY
+
+        if 'min_time' in restrictions: 
+            min_restr = restrictions['min_time']
+
+            if 'current_time' in min_restr:
+                min_current_time = bool(min_restr['current_time'])
+
+            if 'future' in min_restr:
+                min_future = NullBooleanEnum.from_value(min_restr['future'])
+
+            if 'past' in min_restr:
+                min_past = NullBooleanEnum.from_value(min_restr['past'])
+
+            if 'format' in min_restr:
+                min_format = UnixNumberFormatEnum.from_value(min_restr['format'])
+
+            elif not min_current_time:
+                return False, [f'DEV ERROR: {name} unix min_time restriction must have a format if current time not set']
+
+            if 'value' in min_restr:
+                min_value = min_restr['value']
+
+            elif not min_current_time:
+                return False, [f'DEV ERROR: {name} unix min_time restriction must have a value if current time not set']
+
+        if 'max_time' in restrictions:
+            max_restr = restrictions['max_time']
+
+            if 'future' in max_restr:
+                max_future = NullBooleanEnum.from_value(max_restr['future'])
+
+            if 'past' in max_restr:
+                max_past = NullBooleanEnum.from_value(max_restr['past'])
+
+            if 'format' in max_restr:
+                max_format = UnixNumberFormatEnum.from_value(max_restr['format'])
+
+            else:
+                return False, [f'DEV ERROR: {name} unix max_time restriction must have a format']
+
+            if 'value' in max_restr:
+                max_value = max_restr['value']
+
+            else:
+                return False, [f'DEV ERROR: {name} unix max_time restriction must have a value']
+
+        if min_future == NullBooleanEnum.TRUE or max_future == NullBooleanEnum.TRUE:
+            if min_future != max_future and not min_current_time:
+                return False, [f'DEV ERROR: {name} unix future restriction for min/max must both be set to TRUE']
+
+            if min_past == NullBooleanEnum.TRUE or max_past == NullBooleanEnum.TRUE:
+                return False, [f'DEV ERROR: {name} unix restriction for min/max past cannot be set to TRUE when min/max future is set to TRUE']
+
+            if allow_future == NullBooleanEnum.FALSE:
+                return False, [f'DEV ERROR: {name} unix restriction for min/max future cannot be set to TRUE when future unix is not allowed']
+
+            if not min_current_time:
+                min_time = convert_unix_restr_to_limit(1, min_format, min_value)
+
+            max_time = convert_unix_restr_to_limit(1, max_format, max_value)
+
+            if min_time >= max_time:
+                return False, [f'DEV ERROR: {name} unix future restriction min limit ({min_time}) greater than max limit ({min_time})']
+
+            if min_time > data:
+                return False, [f'{name} unix out of range (PAST)']
+
+            if data > max_time:
+                return False, [f'{name} unix out of range (FUTURE)']
+
+        if min_past == NullBooleanEnum.TRUE or max_past == NullBooleanEnum.TRUE:
+            if min_past != max_past and not min_current_time:
+                return False, [f'DEV ERROR: {name} unix past restriction for min/max must both be set to TRUE']
+
+            if allow_past == NullBooleanEnum.FALSE:
+                return False, [f'DEV ERROR: {name} unix restriction for min/max past cannot be set to TRUE when past unix is not allowed']
+
+            if not min_current_time:
+                min_time = convert_unix_restr_to_limit(-1, min_format, min_value)
+
+            max_time = convert_unix_restr_to_limit(-1, max_format, max_value)
+
+            if min_time <= max_time:
+                return False, [f'DEV ERROR: {name} unix past restriction min limit ({min_time}) greater than max limit ({min_time})']
+
+            if min_time < data:
+                return False, [f'{name} unix out of range (PAST)']
+
+            if data < max_time:
+                return False, [f'{name} unix out of range (FUTURE)']
 
         return True, []

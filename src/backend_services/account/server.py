@@ -6,7 +6,7 @@ from src.backend_services.account.database.database import engine, Base, databas
 
 from src.backend_services.account.authentication.login import UserAuthentication_Service
 
-from src.backend_services.common.proto import user_login_pb2, user_login_pb2_grpc
+from src.backend_services.common.proto import user_login_pb2_grpc
 
 os.environ["GRPC_DNS_RESOLVER"] = "native"
 
@@ -30,6 +30,8 @@ def serve():
     Base.metadata.create_all(engine)
 
     add_services(server)
+
+    print('Server Running')
 
     server.wait_for_termination()
 
