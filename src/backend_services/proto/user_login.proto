@@ -17,7 +17,7 @@ message UserRegistrationRequest {
     // gender
     string gender = 5;
     // date_of_birth
-    int32 date_of_birth = 6;
+    string date_of_birth = 6;
 }
 
 //

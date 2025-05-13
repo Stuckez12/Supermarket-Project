@@ -48,15 +48,9 @@ auth:
       numbers: 'NONE'
       symbols: 'NONE'
   date_of_birth:
-    type: unix
+    type: datetime
     data: None
     restrictions:
-      allow_past: 'TRUE'
-      min_time:
-        past: 'TRUE'
-        format: 'YEARS'
-        value: 12
-      max_time:
-        past: 'TRUE'
-        format: 'YEARS'
-        value: 30
+      date:
+        min: ADAPTIVE
+        max: ADAPTIVE

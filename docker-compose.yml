@@ -27,6 +27,8 @@ services:
     networks:
       - pg-network
     attach: false
+    logging:
+      driver: "none"
 
   account-service:
     build:
@@ -47,3 +49,4 @@ networks:
 
 volumes:
   postgres_data:
+  pg-network:

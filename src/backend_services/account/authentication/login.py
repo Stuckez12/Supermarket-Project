@@ -1,4 +1,9 @@
 import grpc
+import uuid
+
+from datetime import datetime
+
+from werkzeug.security import generate_password_hash
 
 from src.backend_services.account.database.database import get_db_conn
 from src.backend_services.account.database.models import User
@@ -11,6 +16,18 @@ from src.backend_services.common.utils.schema import load_yaml_file_as_dict, get
 
 # Global file variables
 AUTH_VERIFY_CONFIG = None
+
+
+def reconfigure_adaptive_restrictions():
+    global AUTH_VERIFY_CONFIG
+
+    today = datetime.today()
+
+    min_date = today.replace(year=today.year - 110).strftime("%Y-%m-%d")
+    max_date = today.replace(year=today.year - 9).strftime("%Y-%m-%d")
+
+    AUTH_VERIFY_CONFIG['date_of_birth']['restrictions']['date']['min'] = min_date
+    AUTH_VERIFY_CONFIG['date_of_birth']['restrictions']['date']['max'] = max_date
 
 
 def initialise_file():
@@ -54,6 +71,8 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             'date_of_birth': request.date_of_birth,
         }
 
+        reconfigure_adaptive_restrictions()
+
         success, message, schema = get_verification_schema(AUTH_VERIFY_CONFIG, data)
 
         if not success:
@@ -74,7 +93,45 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             return user_login_pb2.UserRegistrationResponse(status=return_status)
 
         with get_db_conn() as session:
-            #user_result = session.query(User)
+            user_result = session.query(User).all()
+
+            print(user_result)
+
+
+            user_result = session.query(User).filter(User.email == request.email).first()
+
+            print(user_result)
+
+            if user_result is not None:
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'Email Already In Use'
+
+                return user_login_pb2.UserRegistrationResponse(status=return_status)
+            
+            new_uuid = str(uuid.uuid4())
+
+            while True:
+                uuid_result = session.query(User).filter(User.uuid == new_uuid).first()
+
+                if uuid_result is None:
+                    break
+
+                new_uuid = uuid.uuid4()
+
+            register_user = User(
+                uuid = new_uuid,
+                email = request.email,
+                password = generate_password_hash(request.password),
+                first_name = request.first_name,
+                last_name = request.last_name,
+                gender = request.gender,
+                date_of_birth = request.date_of_birth
+            )
+
+            session.add(register_user)
+            session.commit()
+            session.refresh(register_user)
 
             return user_login_pb2.UserRegistrationResponse(status=return_status)
 

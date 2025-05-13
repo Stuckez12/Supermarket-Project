@@ -1,8 +1,8 @@
-from sqlalchemy import Column, String, Boolean, DateTime, Date, Text, Integer
-from src.backend_services.account.database.database import Base
 from datetime import datetime, UTC
+from sqlalchemy import Column, String, Boolean, DateTime, Date, Text, Integer
 
-from backend_services.account.database.db_enum_statuses import USER_STATUS_ENUM, GENDER_ENUM, ROLE_ENUM
+from src.backend_services.account.database.db_enum_statuses import USER_STATUS_ENUM, GENDER_ENUM, ROLE_ENUM
+from src.backend_services.account.database.database import Base
 
 
 class User(Base):
@@ -20,7 +20,7 @@ class User(Base):
 
     # Accounts' Password Management
     password = Column(Text, nullable=False)                                             # User Input
-    password_last_changed_at = Column(Text, nullable=False)
+    password_last_changed_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     failed_login_attempts = Column(Integer, default=0, nullable=False)
     account_locked_until = Column(DateTime, nullable=True)
 
@@ -40,6 +40,7 @@ class User(Base):
     email_verified = Column(Boolean, default=False, nullable=False)
     user_status = Column(USER_STATUS_ENUM, default='Unverified', nullable=False)
     user_role = Column(ROLE_ENUM, default='Customer', nullable=False)
+
 
     def is_accessible(self):
         return self.role.in_(['Active', 'Inactive', 'Unverified'])
