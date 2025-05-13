@@ -242,6 +242,9 @@ class DataVerification():
             elif data_points['type'] == 'unix':
                 success, errors = cls.verify_unix(variable, data, restrictions)
 
+            elif data_points['type'] == 'datetime':
+                success, errors = cls.verify_datetime_string(variable, data, restrictions)
+
             if len(errors) != 0 and not success:
                 total_errors += errors
 
@@ -689,4 +692,88 @@ class DataVerification():
             if data < max_time:
                 return False, [f'{name} unix out of range (FUTURE)']
 
+        return True, []
+
+
+    def verify_datetime_string(cls, name, data, restrictions={}):
+        '''
+        restrictions
+            date:
+            - min_date: str
+            - max_date: str
+            time:
+            - min_time: str
+            - max_time: str
+        '''
+
+
+        def check_data_format(data, _format):
+            try:
+                data_object = datetime.strptime(data, _format)
+
+                return True, data_object
+
+            except:
+                return False, None
+
+        if type(data) != str:
+            return False, [f'{name} type is invalid. Expected str but received {type(data).__name__}']
+        
+        data_object = 0
+        today = datetime.today()
+
+        _date = False      
+        min_date = today.replace(year=today.year - 100).strftime("%Y-%m-%d")
+        max_date = today.replace(year=today.year + 100).strftime("%Y-%m-%d")
+
+        _time = False
+        min_time = '00:00:00'
+        max_time = '23:59:59'
+
+        if 'date' in restrictions:
+            _date = True
+
+            if 'min' in restrictions['date']:
+                min_date = restrictions['date']['min']
+
+            if 'max' in restrictions['date']:
+                max_date = restrictions['date']['max']
+
+        if 'time' in restrictions:
+            _time = True
+
+            if 'min' in restrictions['time']:
+                min_time = restrictions['time']['min']
+
+            if 'max' in restrictions['time']:
+                max_time = restrictions['time']['max']
+
+        min_val = 0
+        max_val = 0
+        success = None
+
+        if _date and _time:
+            min_val = datetime.strptime(f'{min_date} {min_time}', "%Y-%m-%d %H:%M:%S")
+            max_val = datetime.strptime(f'{max_date} {max_time}', "%Y-%m-%d %H:%M:%S")
+
+            success, data_object = check_data_format(data, "%Y-%m-%d %H:%M:%S")
+
+        elif _date:
+            min_val = datetime.strptime(f'{min_date}', "%Y-%m-%d")
+            max_val = datetime.strptime(f'{max_date}', "%Y-%m-%d")
+
+            success, data_object = check_data_format(data, "%Y-%m-%d")
+
+        elif _time:
+            min_val = datetime.strptime(f'{min_time}', "%H:%M:%S")
+            max_val = datetime.strptime(f'{max_time}', "%H:%M:%S")
+
+            success, data_object = check_data_format(data, "%H:%M:%S")
+
+        if not success:
+            return False, [f'{name} invalid datetime format']
+
+        if (min_val > data_object) and (max_val < data_object):
+            return False, [f'{name} datetime out of range']
+        
         return True, []
