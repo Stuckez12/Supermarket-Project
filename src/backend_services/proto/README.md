@@ -1,4 +1,5 @@
 # Converting Proto Files to Python
+## Single File Action
 
 Communications between each service will be handled by Googles protobufs' method.
 Proto files are created specifying the name and type of data that will be sent across.
@@ -13,6 +14,10 @@ python -m grpc_tools.protoc -Isrc/backend_services/proto --pyi_out=src/backend_s
 This command generates two python files that can be used to communicate between the services.
 To use the command, replace ```your_protofile_here.proto``` with the name of the protofile
 you want to generate and then execute in the command terminal.
+
+
+
+## Proto Folder Action
 
 Another more simple way to create these .py proto files is to run the ps1 file (Windows 10/11).
 This by default will not work for Windows as it uses PowerShell to execute.

@@ -23,7 +23,13 @@ def serve():
     print(f'Max Workers Assigned: {max_workers}')
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
-    server.add_insecure_port('[::]:' + port)
+
+    server_credentials = grpc.ssl_server_credentials(
+        [(open('localhost-key.pem', 'rb').read(), open('localhost-cert.pem', 'rb').read())]
+    )
+
+    server.add_secure_port(f'[::]:{port}', server_credentials)
+    print(f'Starting gRPC server on https://localhost:{port}')
     server.start()
 
     database_initialization()
@@ -32,8 +38,8 @@ def serve():
     add_services(server)
 
     print('Server Running')
-
     server.wait_for_termination()
+
 
 if __name__ == '__main__':
     serve()
