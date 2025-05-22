@@ -3,6 +3,7 @@
 import grpc
 import warnings
 
+import input_output_messages_pb2 as input__output__messages__pb2
 import user_login_pb2 as user__login__pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
@@ -44,6 +45,16 @@ class UserAuthServiceStub(object):
                 request_serializer=user__login__pb2.UserLoginRequest.SerializeToString,
                 response_deserializer=user__login__pb2.UserLoginResponse.FromString,
                 _registered_method=True)
+        self.OTPVerification = channel.unary_unary(
+                '/user_login.UserAuthService/OTPVerification',
+                request_serializer=user__login__pb2.OTPRequest.SerializeToString,
+                response_deserializer=user__login__pb2.UserLoginResponse.FromString,
+                _registered_method=True)
+        self.UserLogout = channel.unary_unary(
+                '/user_login.UserAuthService/UserLogout',
+                request_serializer=user__login__pb2.UserLogoutRequest.SerializeToString,
+                response_deserializer=input__output__messages__pb2.HTTP_Response.FromString,
+                _registered_method=True)
 
 
 class UserAuthServiceServicer(object):
@@ -63,6 +74,20 @@ class UserAuthServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def OTPVerification(self, request, context):
+        """OTPVerification
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UserLogout(self, request, context):
+        """UserLogout
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_UserAuthServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -75,6 +100,16 @@ def add_UserAuthServiceServicer_to_server(servicer, server):
                     servicer.UserLogin,
                     request_deserializer=user__login__pb2.UserLoginRequest.FromString,
                     response_serializer=user__login__pb2.UserLoginResponse.SerializeToString,
+            ),
+            'OTPVerification': grpc.unary_unary_rpc_method_handler(
+                    servicer.OTPVerification,
+                    request_deserializer=user__login__pb2.OTPRequest.FromString,
+                    response_serializer=user__login__pb2.UserLoginResponse.SerializeToString,
+            ),
+            'UserLogout': grpc.unary_unary_rpc_method_handler(
+                    servicer.UserLogout,
+                    request_deserializer=user__login__pb2.UserLogoutRequest.FromString,
+                    response_serializer=input__output__messages__pb2.HTTP_Response.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -131,6 +166,60 @@ class UserAuthService(object):
             '/user_login.UserAuthService/UserLogin',
             user__login__pb2.UserLoginRequest.SerializeToString,
             user__login__pb2.UserLoginResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def OTPVerification(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/user_login.UserAuthService/OTPVerification',
+            user__login__pb2.OTPRequest.SerializeToString,
+            user__login__pb2.UserLoginResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UserLogout(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/user_login.UserAuthService/UserLogout',
+            user__login__pb2.UserLogoutRequest.SerializeToString,
+            input__output__messages__pb2.HTTP_Response.FromString,
             options,
             channel_credentials,
             insecure,

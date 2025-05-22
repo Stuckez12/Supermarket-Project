@@ -17,6 +17,9 @@ def insert_data_into_schema(schema, data):
             if extracted_data is not None:
                 field_data['check'] = True
 
+            else:
+                field_data['check'] = False
+
         return True, schema
     
     except (AttributeError, TypeError):

@@ -1,14 +1,15 @@
 import os
 import grpc
+
 from concurrent import futures
 
-from src.backend_services.account.database.database import engine, Base, database_initialization
-
+from src.backend_services.account.database.database import Base, engine, database_initialization
 from src.backend_services.account.authentication.login import UserAuthentication_Service
-
 from src.backend_services.common.proto import user_login_pb2_grpc
 
+
 os.environ["GRPC_DNS_RESOLVER"] = "native"
+
 
 def add_services(server):
     user_login_pb2_grpc.add_UserAuthServiceServicer_to_server(UserAuthentication_Service(), server)

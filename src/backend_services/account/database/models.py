@@ -35,6 +35,7 @@ class User(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     last_login = Column(DateTime, default=lambda: datetime.now(UTC), nullable=True)
     last_activity_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=True)
+    last_recorded_login = Column(DateTime, default=lambda: datetime.now(UTC), nullable=True)
 
     # Account Statuses
     email_verified = Column(Boolean, default=False, nullable=False)
@@ -43,8 +44,12 @@ class User(Base):
 
 
     def is_accessible(self):
-        return self.role.in_(['Active', 'Inactive', 'Unverified'])
+        return self.user_role.in_(['Active', 'Inactive', 'Unverified'])
+    
+
+    def is_verified(self):
+        return self.email_verified
     
 
     def is_logged_in(self):
-        return self.role.in_(['Active'])
+        return self.user_role.in_(['Active'])
