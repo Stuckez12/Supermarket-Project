@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -5,7 +7,6 @@ from contextlib import contextmanager
 from sqlalchemy.sql import text
 from sqlalchemy.pool import QueuePool
 
-import os
 
 DATABASE_NAME = os.environ.get('ACCOUNT_DB_NAME')
 

@@ -5,6 +5,8 @@ from python_http_client.exceptions import UnauthorizedError, ForbiddenError, \
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
+from src.backend_services.common.email.format_http_files import format_html_template
+from src.backend_services.common.email.otp_functions import create_otp, verify_otp
 
 
 SENDGRID_EMAIL_API = os.environ.get('SENDGRID_EMAIL_API')
@@ -66,3 +68,23 @@ def send_email(email):
         message = 'Maximum Daily Emails Sent Reached Or Sending Too Many Requests At Once'
 
     return success, http_code, message
+
+
+def generate_otp_email(send_to: list):
+    '''
+    
+    '''
+
+    code, otp_id = create_otp()
+
+    html_format = { '{{OTP_CODE}}': code }
+    otp_template = format_html_template('src/backend_services/common/email/http_email_files/otp_verification.html', html_format)
+
+    email = create_email(send_to, 'Verify Your Account', html_context=otp_template)
+
+    success, code, message = send_email(email)
+
+    if not success:
+        return success, None, message
+
+    return success, otp_id, message

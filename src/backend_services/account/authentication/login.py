@@ -8,8 +8,10 @@ from werkzeug.security import generate_password_hash
 from src.backend_services.account.database.database import get_db_conn
 from src.backend_services.account.database.models import User
 
+from src.backend_services.common.email.email_functions import generate_otp_email
 from src.backend_services.common.proto.input_output_messages_pb2 import HTTP_Response
 from src.backend_services.common.proto import user_login_pb2, user_login_pb2_grpc
+from src.backend_services.common.redis.redis import get_redis_conn
 from src.backend_services.common.utils.data_verification import DataVerification
 from src.backend_services.common.utils.schema import load_yaml_file_as_dict, get_verification_schema
 
@@ -93,14 +95,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             return user_login_pb2.UserRegistrationResponse(status=return_status)
 
         with get_db_conn() as session:
-            user_result = session.query(User).all()
-
-            print(user_result)
-
-
             user_result = session.query(User).filter(User.email == request.email).first()
-
-            print(user_result)
 
             if user_result is not None:
                 return_status.success = False
@@ -133,7 +128,33 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             session.commit()
             session.refresh(register_user)
 
+        success, otp_id, message = generate_otp_email([request.email])
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = 'Unable To Send Verification Email'
+
             return user_login_pb2.UserRegistrationResponse(status=return_status)
+
+        success, message, redis_client = get_redis_conn()
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = 'Unable To Connect To Redis Service'
+
+            return user_login_pb2.UserRegistrationResponse(status=return_status)
+
+        redis_client.set(
+            name=f'verification:otp:{request.email}',
+            value=otp_id,
+            ex=600  # 10 minutes
+        )
+
+        print('Fetched Code From Redis:', redis_client.get(f'verification:otp:{request.email}'))
+
+        return user_login_pb2.UserRegistrationResponse(status=return_status)
 
 
     def UserLogin(self, request: user_login_pb2.UserLoginRequest, context: grpc.ServicerContext) -> user_login_pb2.UserLoginResponse:
