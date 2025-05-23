@@ -12,6 +12,7 @@ from src.backend_services.common.email.otp_functions import create_otp, verify_o
 SENDGRID_EMAIL_API = os.environ.get('SENDGRID_EMAIL_API')
 SENDGRID_CLIENT = SendGridAPIClient(SENDGRID_EMAIL_API)
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
+DEBUG_SEND_EMAIL = os.environ.get('DEBUG_SEND_EMAILS')
 
 
 def create_email(to_emails, subject, from_email=EMAIL_SENDER, plain_context=None, html_context=None):
@@ -38,6 +39,9 @@ def send_email(email):
     success = False
     http_code = 202
     message = 'Email Sent Successfully'
+
+    if not DEBUG_SEND_EMAIL:
+        return True, 202, message
 
     try:
         SENDGRID_CLIENT.send(email)
