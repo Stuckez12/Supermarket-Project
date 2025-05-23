@@ -6,7 +6,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from src.backend_services.common.email.format_http_files import format_html_template
-from src.backend_services.common.email.otp_functions import create_otp, verify_otp
+from src.backend_services.common.email.otp_functions import create_otp
 
 
 SENDGRID_EMAIL_API = os.environ.get('SENDGRID_EMAIL_API')

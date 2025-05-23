@@ -61,6 +61,29 @@ def update_session(session_uuid, user_uuid, user_data):
     return session_uuid, unix_time
 
 
+def delete_session(session_uuid, user_uuid):
+    '''
+    
+    '''
+
+    success, message, redis_client = get_redis_conn()
+
+    if not success:
+        return False, message
+    
+    session_id = f'sid:{session_uuid}:{user_uuid}'
+    
+    u_data = redis_client.delete(session_id + ':user_data')
+    ver = redis_client.delete(session_id + ':verified')
+
+    success = bool(u_data and ver)
+
+    if not success:
+        return False, 'Unable To Log Out'
+
+    return True, 'User Logged Out'
+
+
 def user_to_json(user):
     '''
     

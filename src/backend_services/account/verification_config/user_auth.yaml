@@ -70,3 +70,9 @@ otp:
       upper_case: 'MUST'
       numbers: 'NONE'
       symbols: 'NONE'
+
+logout:
+  session_uuid:
+    type: str_uuid
+  user_uuid:
+    type: str_uuid

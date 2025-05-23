@@ -14,7 +14,7 @@ from src.backend_services.common.email.otp_functions import verify_otp_code
 from src.backend_services.common.proto import user_login_pb2, user_login_pb2_grpc
 from src.backend_services.common.proto.input_output_messages_pb2 import HTTP_Response
 from src.backend_services.common.redis.redis import get_redis_conn
-from src.backend_services.common.redis.user_sessions import create_session, update_session
+from src.backend_services.common.redis.user_sessions import create_session, update_session, delete_session
 from src.backend_services.common.utils.data_verification import DataVerification
 from src.backend_services.common.utils.schema import load_yaml_file_as_dict, get_verification_schema
 from src.backend_services.common.utils.utils import user_proto_format
@@ -23,6 +23,7 @@ from src.backend_services.common.utils.utils import user_proto_format
 # Global file variables
 AUTH_VERIFY_CONFIG = None
 OTP_VERIFY_CONFIG = None
+LOGOUT_VERIFY_CONFIG = None
 
 
 def reconfigure_adaptive_restrictions(): # TEMPORARY
@@ -45,6 +46,9 @@ def initialise_file():
 
     global OTP_VERIFY_CONFIG
     OTP_VERIFY_CONFIG = schemas['otp']
+
+    global LOGOUT_VERIFY_CONFIG
+    LOGOUT_VERIFY_CONFIG = schemas['logout']
 
 
 initialise_file()
@@ -331,33 +335,20 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
 
             return user_login_pb2.UserLoginResponse(status=return_status, otp_required=False)
         
-        print('Data Verified')
-        
         success, http_status, message, resend_otp_email = verify_otp_code(request.email, request.otp_code)
-
-        print('--------')
         
         if not success:
             return_status.success = False
             return_status.http_status = http_status
             return_status.message = message
 
-            print('Invalid OTP Code')
-
             if resend_otp_email:
                 success, return_message = send_and_store_otp_code(request.email, return_status, replace_message=False)
 
-                print('Sending New OTP Email')
-
                 if not success:
-                    print('Failed To Send Email')
                     return return_message
                 
-            print('Returning')
-                
             return user_login_pb2.UserLoginResponse(status=return_status)
-        
-        print('OTP Accepted')
 
         user_uuid = None
         
@@ -380,6 +371,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
 
             if request.return_action == 'LOGIN':
                 success, message = update_session(request.session_uuid, user_uuid, user_result)
+                return_status.http_status = 202
 
                 if not success:
                     return_status.success = False
@@ -407,4 +399,34 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             message='Request Successful'
         )
 
-        return user_login_pb2.UserLoginResponse(status=return_status)
+        data = {
+            'session_uuid': request.session_uuid,
+            'user_uuid': request.user_uuid
+        }
+        success, message, schema = get_verification_schema(LOGOUT_VERIFY_CONFIG, data)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = message
+
+            return return_status
+        
+        success, errors = DataVerification().verify_data(schema)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 400
+            return_status.message = 'Invalid Data Recieved'
+            return_status.error.extend(errors)
+
+            return return_status
+        
+        success, message = delete_session(request.session_uuid, request.user_uuid)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = message
+
+        return return_status
