@@ -27,7 +27,7 @@ message UserData {
     // email
     string email = 2;
     // password_last_changed_at
-    string password_last_changed_at = 3;
+    int64 password_last_changed_at = 3;
     // first_name
     string first_name = 4;
     // last_name
@@ -37,11 +37,11 @@ message UserData {
     // date_of_birth
     string date_of_birth = 7;
     // created_at
-    string created_at = 8;
+    int64 created_at = 8;
     // updated_at
-    string updated_at = 9;
+    int64 updated_at = 9;
     // last_login
-    string last_login = 10;
+    int64 last_login = 10;
     // email_verified
     bool email_verified = 11;
     // user_status

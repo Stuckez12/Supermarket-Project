@@ -38,18 +38,18 @@ class UserData(_message.Message):
     USER_ROLE_FIELD_NUMBER: _ClassVar[int]
     uuid: str
     email: str
-    password_last_changed_at: str
+    password_last_changed_at: int
     first_name: str
     last_name: str
     gender: str
     date_of_birth: str
-    created_at: str
-    updated_at: str
-    last_login: str
+    created_at: int
+    updated_at: int
+    last_login: int
     email_verified: bool
     user_status: str
     user_role: str
-    def __init__(self, uuid: _Optional[str] = ..., email: _Optional[str] = ..., password_last_changed_at: _Optional[str] = ..., first_name: _Optional[str] = ..., last_name: _Optional[str] = ..., gender: _Optional[str] = ..., date_of_birth: _Optional[str] = ..., created_at: _Optional[str] = ..., updated_at: _Optional[str] = ..., last_login: _Optional[str] = ..., email_verified: bool = ..., user_status: _Optional[str] = ..., user_role: _Optional[str] = ...) -> None: ...
+    def __init__(self, uuid: _Optional[str] = ..., email: _Optional[str] = ..., password_last_changed_at: _Optional[int] = ..., first_name: _Optional[str] = ..., last_name: _Optional[str] = ..., gender: _Optional[str] = ..., date_of_birth: _Optional[str] = ..., created_at: _Optional[int] = ..., updated_at: _Optional[int] = ..., last_login: _Optional[int] = ..., email_verified: bool = ..., user_status: _Optional[str] = ..., user_role: _Optional[str] = ...) -> None: ...
 
 class UserRegistrationResponse(_message.Message):
     __slots__ = ("status", "user")
