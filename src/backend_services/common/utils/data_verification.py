@@ -88,11 +88,7 @@ class DataVerification():
         '''
 
         if 'min_num' in restrictions:
-            if restrictions['min_num'] > 0:
-                return restrictions['min_num'], rest_errors
-
-            else:
-                rest_errors.append(f'DEV ERROR: {name}-restriction-min_num is invalid. min_num must be a positive int')
+            return restrictions['min_num'], rest_errors
 
         return data, rest_errors
 
@@ -103,11 +99,7 @@ class DataVerification():
         '''
 
         if 'max_num' in restrictions:
-            if restrictions['max_num'] > 0:
-                return restrictions['max_num'], rest_errors
-
-            else:
-                rest_errors.append(f'DEV ERROR: {name}-restriction-max_num is invalid. max_num must be a positive int')
+            return restrictions['max_num'], rest_errors
 
         return data, rest_errors
 
@@ -206,12 +198,14 @@ class DataVerification():
         then it will default to its origional value.
 
         cls (any): 
-        data (dict): 
+        data (dict):
+        opt (list): 
 
         return (any): 
         '''
 
         total_errors = []
+        optional_errors = []
 
         for variable, data_points in data.items():
             if not data_points['check']:
@@ -222,6 +216,12 @@ class DataVerification():
 
             data = data_points['data']
             restrictions = {}
+
+            optional = False
+
+            if 'optional' in data_points:
+                if data_points['optional']:
+                    optional = True
 
             if 'restrictions' in data_points:
                 restrictions = data_points['restrictions']
@@ -245,13 +245,17 @@ class DataVerification():
             elif data_points['type'] == 'datetime':
                 success, errors = cls.verify_datetime_string(variable, data, restrictions)
 
-            if len(errors) != 0 and not success:
-                total_errors += errors
+            if optional:
+                optional_errors += errors
+
+            else:
+                if len(errors) != 0 and not success:
+                    total_errors += errors
 
         if len(total_errors) != 0:
-            return False, total_errors
+            return False, total_errors + optional_errors
         
-        return True, []
+        return True, optional_errors
 
 
     def verify_string_data(cls: any, name: str, data: any, restrictions: dict={}) -> tuple[bool, list]:

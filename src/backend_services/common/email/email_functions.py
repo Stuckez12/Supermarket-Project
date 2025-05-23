@@ -77,6 +77,8 @@ def generate_otp_email(send_to: list):
 
     code, otp_id = create_otp()
 
+    print('OTP Data:', send_to, code, otp_id)
+
     html_format = { '{{OTP_CODE}}': code }
     otp_template = format_html_template('src/backend_services/common/email/http_email_files/otp_verification.html', html_format)
 

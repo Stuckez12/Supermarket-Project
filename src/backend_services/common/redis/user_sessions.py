@@ -29,6 +29,34 @@ def create_session(user_uuid, user_data):
     unix_time = int(expiry_time.timestamp())
 
     print('Stored User Session Data:', redis_client.get(session_id + ':user_data'))
+    print('Session UUID:', session_uuid)
+
+    return session_uuid, unix_time
+
+
+def update_session(session_uuid, user_uuid, user_data):
+    '''
+    
+    '''
+
+    success, message, redis_client = get_redis_conn()
+
+    if not success:
+        return False, message
+
+    session_id = f'sid:{session_uuid}:{user_uuid}'
+
+    redis_client.set(session_id + ':user_data', json.dumps(user_to_json(user_data)))
+    redis_client.set(session_id + ':verified', json.dumps(user_data.is_verified()))
+
+    redis_client.expire(session_id + ':user_data', 3600) # 1 hour expiry
+    redis_client.expire(session_id + ':verified', 3600) # 1 hour expiry
+
+    expiry_time = datetime.now(UTC) + timedelta(hours=1)
+    unix_time = int(expiry_time.timestamp())
+
+    print('Stored User Session Data:', redis_client.get(session_id + ':user_data'))
+    print('Session UUID:', session_uuid)
 
     return session_uuid, unix_time
 

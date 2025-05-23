@@ -88,12 +88,16 @@ class UserLogoutRequest(_message.Message):
     def __init__(self, session_uuid: _Optional[str] = ..., user_uuid: _Optional[str] = ...) -> None: ...
 
 class OTPRequest(_message.Message):
-    __slots__ = ("email", "otp_code")
+    __slots__ = ("email", "otp_code", "session_uuid", "return_action")
     EMAIL_FIELD_NUMBER: _ClassVar[int]
     OTP_CODE_FIELD_NUMBER: _ClassVar[int]
+    SESSION_UUID_FIELD_NUMBER: _ClassVar[int]
+    RETURN_ACTION_FIELD_NUMBER: _ClassVar[int]
     email: str
-    otp_code: int
-    def __init__(self, email: _Optional[str] = ..., otp_code: _Optional[int] = ...) -> None: ...
+    otp_code: str
+    session_uuid: str
+    return_action: str
+    def __init__(self, email: _Optional[str] = ..., otp_code: _Optional[str] = ..., session_uuid: _Optional[str] = ..., return_action: _Optional[str] = ...) -> None: ...
 
 class UserSession(_message.Message):
     __slots__ = ("session_uuid", "expiry_time")

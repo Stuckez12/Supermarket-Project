@@ -91,7 +91,11 @@ message OTPRequest {
     // email
     string email = 1;
     // otp_code
-    int64 otp_code = 2;
+    string otp_code = 2;
+    // session_uuid
+    string session_uuid = 3;
+    // return_action is to specify whether to log in or register
+    string return_action = 4;
 }
 
 // UserSession
