@@ -35,14 +35,12 @@ To reset the execution policy to its previous state, run the following command b
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Restricted
 ```
 
-When the PowerShell execution policy has been enabled, it is now possible
-to run the following command below.
+When the PowerShell execution policy has been enabled, it is now possible to run the following command below.
 
 ```
 .\src\backend_services\proto\generate_all_protofiles.ps1
 ```
 
-This command will execute the python protofile generation command for
-every protofile within ```src/backend_services/proto``` file location.
+This command will execute the python protofile generation command for every protofile within ```src/backend_services/proto``` file location.
 
 Once ran, make sure to reset the execution policy to its default settings.

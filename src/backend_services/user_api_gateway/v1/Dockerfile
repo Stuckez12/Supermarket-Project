@@ -35,4 +35,4 @@ USER appuser
 EXPOSE 50050
 
 ENV PYTHONPATH=/app/src/backend_services/common/proto
-CMD ["python", "-m", "src.backend_services.account.server"]
+CMD ["python", "-m", "src.backend_services.user_api_gateway.server"]

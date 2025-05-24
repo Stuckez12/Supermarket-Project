@@ -28,8 +28,6 @@ services:
       - pg-network
     env_file: .env
     attach: false
-    logging:
-      driver: "none"
 
   redis:
     image: redis:latest
@@ -39,8 +37,22 @@ services:
     networks:
       - redis-network
     env_file: .env
-    logging:
-      driver: none
+
+  customer_web_api_gateway:
+    build:
+        context: .
+        dockerfile: src/backend_services/user_api_gateway/Dockerfile
+    container_name: customer_web_api_gateway
+    ports:
+      - ${CW_API_GWAY_PORT}:${CW_API_GWAY_PORT}
+    networks:
+      - pg-network
+      - redis-network
+    depends_on:
+      - redis
+      - account-service
+    env_file: .env
+    attach: false
 
   account-service:
     build:
