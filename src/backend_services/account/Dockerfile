@@ -32,7 +32,7 @@ ENV PYTHONUNBUFFERED=1
 
 USER appuser
 
-EXPOSE 50050
+EXPOSE 50051
 
 ENV PYTHONPATH=/app/src/backend_services/common/proto
 CMD ["python", "-m", "src.backend_services.account.server"]

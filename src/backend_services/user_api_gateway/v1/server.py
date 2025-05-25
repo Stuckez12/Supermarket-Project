@@ -20,6 +20,6 @@ if __name__ == "__main__":
         app,
         host=os.environ.get('CW_API_GWAY_HOST'),
         port=int(os.environ.get('CW_API_GWAY_PORT')),
-        ssl_certfile='localhost-cert.pem',
-        ssl_keyfile='localhost-key.pem'
+        ssl_certfile=os.environ.get('CW_API_GWAY_CERT'),
+        ssl_keyfile=os.environ.get('CW_API_GWAY_PKEY')
     )

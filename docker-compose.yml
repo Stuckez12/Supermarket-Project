@@ -41,7 +41,7 @@ services:
   customer_web_api_gateway:
     build:
         context: .
-        dockerfile: src/backend_services/user_api_gateway/Dockerfile
+        dockerfile: src/backend_services/user_api_gateway/v1/Dockerfile
     container_name: customer_web_api_gateway
     ports:
       - ${CW_API_GWAY_PORT}:${CW_API_GWAY_PORT}

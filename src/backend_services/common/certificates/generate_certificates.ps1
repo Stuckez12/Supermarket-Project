@@ -5,7 +5,7 @@ $certificate_directory = "./src/backend_services/common/certificates"
 
 $config_directory = "./openssl.cnf"
 
-$services  = @("account", "website")
+$services  = @("account", "user_api_gateway")
 
 foreach ($service in $services) {
     $certificate_folder = $certificate_directory + "/$service"
