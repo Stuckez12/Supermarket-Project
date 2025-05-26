@@ -63,6 +63,8 @@ DEFAULT_CHANNEL_OPTIONS = [
     # Time is in milliseconds (default - 4 seconds)
     ('grpc.max_reconnect_backoff_ms', 4000)
 ]
+DEFAULT_CHANNEL_OPTIONS = [('grpc.keepalive_permit_without_calls', 0)]
+
 
 
 class ServerCommunication():
@@ -78,17 +80,31 @@ class ServerCommunication():
     channel = None
     stub = None
 
-    def __init__(cls, channel_host, channel_port, grpc_stub, channel_secure=False, rpc_max_retries=3, channel_options=DEFAULT_CHANNEL_OPTIONS):
+    def __init__(cls, channel_host, channel_port, grpc_stub, channel_secure=False, server_certificate=None, rpc_max_retries=3, channel_options=DEFAULT_CHANNEL_OPTIONS):
         '''
         
         '''
 
         cls.host = channel_host
         cls.port = channel_port
+
+        cls.stub = None
+        cls.stub_class = grpc_stub
+
         cls.secure_channel = channel_secure
+        cls.certificate = None
+
         cls.options = channel_options
-        cls.stub = grpc_stub
         cls.max_retries = rpc_max_retries
+
+        if cls.secure_channel:
+            if server_certificate is None:
+                error_msg = f'Failed To Initialise ServerCommunication For {cls.host}:{cls.port}. Server Certificate Must Be Provided'
+                raise AttributeError(error_msg)
+            
+            else:
+                credentials = open(server_certificate, 'rb').read()
+                cls.certificate = grpc.ssl_channel_credentials(root_certificates=credentials)
 
         cls.reconnect()
 
@@ -100,8 +116,8 @@ class ServerCommunication():
 
         url = cls.host + ':' + cls.port
 
-        cls.channel = grpc.secure_channel(url, options=cls.options) if cls.secure_channel else grpc.insecure_channel(url, options=cls.options)
-        cls.stub = cls.stub(cls.channel)
+        cls.channel = grpc.secure_channel(url, cls.certificate, options=cls.options) if cls.secure_channel else grpc.insecure_channel(url, options=cls.options)
+        cls.stub = cls.stub_class(cls.channel)
 
 
     def grpc_request(cls, request, data):

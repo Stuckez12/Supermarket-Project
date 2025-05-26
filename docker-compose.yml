@@ -51,6 +51,9 @@ services:
     depends_on:
       - redis
       - account-service
+    environment:
+      GRPC_VERBOSITY: DEBUG
+      GRPC_TRACE: all
     env_file: .env
     attach: false
 
