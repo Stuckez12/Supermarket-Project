@@ -101,7 +101,7 @@ class ServerCommunication():
             if server_certificate is None:
                 error_msg = f'Failed To Initialise ServerCommunication For {cls.host}:{cls.port}. Server Certificate Must Be Provided'
                 raise AttributeError(error_msg)
-            
+
             else:
                 credentials = open(server_certificate, 'rb').read()
                 cls.certificate = grpc.ssl_channel_credentials(root_certificates=credentials)
@@ -116,7 +116,12 @@ class ServerCommunication():
 
         url = cls.host + ':' + cls.port
 
-        cls.channel = grpc.secure_channel(url, cls.certificate, options=cls.options) if cls.secure_channel else grpc.insecure_channel(url, options=cls.options)
+        if cls.secure_channel:
+            cls.channel = grpc.secure_channel(url, cls.certificate, options=cls.options)
+
+        else:
+            cls.channel = grpc.insecure_channel(url, options=cls.options)
+
         cls.stub = cls.stub_class(cls.channel)
 
 
@@ -157,7 +162,7 @@ class ServerCommunication():
                             return False, HTTP_Response(
                                 success=False,
                                 http_status=500,
-                                message='Either Client Certificate Missing Or Server Certificate Invalid'
+                                message='Either Certificate Config Error Or Service Unreachable'
                             )
 
                         elif status_code == grpc.StatusCode.INTERNAL:

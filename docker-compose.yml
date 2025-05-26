@@ -48,12 +48,10 @@ services:
     networks:
       - pg-network
       - redis-network
+      - grpc-network
     depends_on:
       - redis
       - account-service
-    environment:
-      GRPC_VERBOSITY: DEBUG
-      GRPC_TRACE: all
     env_file: .env
     attach: false
 
@@ -61,12 +59,13 @@ services:
     build:
         context: .
         dockerfile: src/backend_services/account/Dockerfile
-    container_name: account-service
+    container_name: ${ACCOUNT_SERVICE_NAME}
     ports:
       - ${ACCOUNT_PORT}:${ACCOUNT_PORT}
     networks:
       - pg-network
       - redis-network
+      - grpc-network
     depends_on:
       - db
       - redis
@@ -76,6 +75,8 @@ services:
 networks:
   pg-network:
   redis-network:
+  grpc-network:
+    driver: bridge
 
 volumes:
   postgres_data:

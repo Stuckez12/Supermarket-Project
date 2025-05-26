@@ -68,6 +68,7 @@ def send_and_store_otp_code(email, return_status, replace_message=True):
             return_status.message = 'Unable To Send Verification Email'
 
         else:
+            return_status.message = message
             return_status.error.extend(['Unable To Send Verification Email'])
 
         return False, user_login_pb2.UserRegistrationResponse(status=return_status)

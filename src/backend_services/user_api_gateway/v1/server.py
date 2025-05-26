@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from src.backend_services.common.gRPC.connection_objects import account_client
 
-from src.backend_services.user_api_gateway.v1.account.routes import router as account_router
+from backend_services.user_api_gateway.v1.routes.account.authentication import router as account_router
 
 app = FastAPI(redirect_slashes=False)
 
