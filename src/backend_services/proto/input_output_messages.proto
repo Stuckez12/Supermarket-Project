@@ -1,5 +1,6 @@
 syntax = "proto3";
-package common;
+package input_output;
+
 
 // HTTP_Response is the basic response for every HTTP request a user or API performs
 message HTTP_Response

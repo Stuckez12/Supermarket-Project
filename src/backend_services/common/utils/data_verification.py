@@ -775,7 +775,7 @@ class DataVerification():
             success, data_object = check_data_format(data, "%H:%M:%S")
 
         if not success:
-            return False, [f'{name} invalid datetime format']
+            return False, [f'{name} invalid datetime format. Expected YYYY-MM-DD']
 
         if (min_val > data_object) and (max_val < data_object):
             return False, [f'{name} datetime out of range']

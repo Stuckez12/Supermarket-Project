@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
-from sqlalchemy import Column, String, Boolean, DateTime, Date, Text, Integer
+from datetime import datetime, timezone, UTC
+from sqlalchemy import Column, String, Boolean, DateTime, Date, Text, Integer, ForeignKey
 
 from src.backend_services.account.database.db_enum_statuses import USER_STATUS_ENUM, GENDER_ENUM, ROLE_ENUM
 from src.backend_services.account.database.database import Base
@@ -20,9 +20,9 @@ class User(Base):
 
     # Accounts' Password Management
     password = Column(Text, nullable=False)                                             # User Input
-    password_last_changed_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    password_last_changed_at = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=False)
     failed_login_attempts = Column(Integer, default=0, nullable=False)
-    account_locked_until = Column(DateTime, nullable=True)
+    account_locked_until = Column(Integer, default=0, nullable=True)
 
     # Generic User Details
     first_name = Column(Text, nullable=False)                                           # User Input
@@ -31,11 +31,11 @@ class User(Base):
     date_of_birth = Column(Date, default=lambda: datetime.now(UTC), nullable=False)     # User Input
 
     # Account Activity Recorded
-    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
-    last_login = Column(DateTime, default=lambda: datetime.now(UTC), nullable=True)
-    last_activity_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=True)
-    last_recorded_login = Column(DateTime, default=lambda: datetime.now(UTC), nullable=True)
+    created_at = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=False)
+    updated_at = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=False)
+    last_login = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=True)
+    last_activity_at = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=True)
+    last_recorded_login = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=True)
 
     # Account Statuses
     email_verified = Column(Boolean, default=False, nullable=False)
@@ -44,7 +44,7 @@ class User(Base):
 
 
     def is_accessible(self):
-        return self.user_role.in_(['Active', 'Inactive', 'Unverified'])
+        return self.user_status in ['Active', 'Inactive', 'Unverified']
     
 
     def is_verified(self):
@@ -52,4 +52,19 @@ class User(Base):
     
 
     def is_logged_in(self):
-        return self.user_role.in_(['Active'])
+        return self.user_status in ['Active']
+
+
+class UserLoginAttempts(Base):
+    '''
+    The table for all failed login attempts related to an account within the application.
+    
+    '''
+
+    __tablename__ = "user_login_attempts"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(ForeignKey('user.id'))
+    failed_datetime = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=False)
+    expires = Column(Integer, default=lambda: datetime.now(timezone.utc).timestamp(), nullable=False)
+

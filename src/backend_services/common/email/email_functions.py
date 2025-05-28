@@ -12,7 +12,7 @@ from src.backend_services.common.email.otp_functions import create_otp
 SENDGRID_EMAIL_API = os.environ.get('SENDGRID_EMAIL_API')
 SENDGRID_CLIENT = SendGridAPIClient(SENDGRID_EMAIL_API)
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
-DEBUG_SEND_EMAIL = os.environ.get('DEBUG_SEND_EMAILS')
+DEBUG_SEND_EMAIL = int(os.environ.get('DEBUG_SEND_EMAILS'))
 
 
 def create_email(to_emails, subject, from_email=EMAIL_SENDER, plain_context=None, html_context=None):

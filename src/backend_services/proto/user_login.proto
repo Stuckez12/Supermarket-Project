@@ -53,7 +53,7 @@ message UserData {
 // UserRegistrationResponse
 message UserRegistrationResponse {
     // success is boolean response that is returned stating if the request was successful or had failed
-    common.HTTP_Response status = 1;
+    input_output.HTTP_Response status = 1;
     // user contains all the relevant data that can be safely passed to the frontend
     UserData user = 2;
 }
@@ -69,7 +69,7 @@ message UserLoginRequest {
 // UserLoginResponse
 message UserLoginResponse {
     // success is boolean response that is returned stating if the request was successful or had failed
-    common.HTTP_Response status = 1;
+    input_output.HTTP_Response status = 1;
     // user contains all the relevant data that can be safely passed to the frontend
     UserData user = 2;
     // session
@@ -106,6 +106,7 @@ message UserSession {
     int64 expiry_time = 2;
 }
 
+// UserAuthService
 service UserAuthService {
     // UserRegistration
     rpc UserRegistration(UserRegistrationRequest) returns (UserRegistrationResponse) {}
@@ -114,5 +115,5 @@ service UserAuthService {
     // OTPVerification
     rpc OTPVerification(OTPRequest) returns (UserLoginResponse) {}
     // UserLogout
-    rpc UserLogout(UserLogoutRequest) returns (common.HTTP_Response) {}
+    rpc UserLogout(UserLogoutRequest) returns (input_output.HTTP_Response) {}
 }

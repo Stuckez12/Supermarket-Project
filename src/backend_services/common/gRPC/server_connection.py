@@ -142,9 +142,10 @@ class ServerCommunication():
             try:
                 if isinstance(request, str):
                     call_func = getattr(cls.stub, request)
+
                 else:
                     call_func = request
-                
+
                 return True, call_func(data)
 
             except grpc.RpcError as e:
@@ -231,3 +232,9 @@ class ServerCommunication():
                     http_status=500,
                     message='An Unexpected Error Occured'
                 )
+            
+        return False, HTTP_Response(
+            success=False,
+            http_status=500,
+            message='No Response Received'
+        )
