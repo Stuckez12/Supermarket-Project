@@ -1,8 +1,16 @@
+'''
+The tables required for the account-service to operate
+'''
+
 from datetime import datetime, timezone, UTC
-from sqlalchemy import Column, String, Boolean, DateTime, Date, Text, Integer, ForeignKey
+from sqlalchemy import Column, String, Boolean, Date, Text, Integer, ForeignKey
+from typing import Self
 
 from src.backend_services.account.database.db_enum_statuses import USER_STATUS_ENUM, GENDER_ENUM, ROLE_ENUM
 from src.backend_services.account.database.database import Base
+
+
+
 
 
 class User(Base):
@@ -43,22 +51,45 @@ class User(Base):
     user_role = Column(ROLE_ENUM, default='Customer', nullable=False)
 
 
-    def is_accessible(self):
-        return self.user_status in ['Active', 'Inactive', 'Unverified']
-    
+    def is_accessible(cls: Self) -> bool:
+        '''
+        Checks whether an account is accessible by the user.
 
-    def is_verified(self):
-        return self.email_verified
-    
+        cls (Self): the sqlalchemy table class
 
-    def is_logged_in(self):
-        return self.user_status in ['Active']
+        return (bool): account accessible flag
+        '''
+
+        return cls.user_status in ['Active', 'Inactive', 'Unverified']
+
+
+    def is_verified(cls: Self) -> bool:
+        '''
+        Checks whether an account is verified
+
+        cls (Self): the sqlalchemy table class
+
+        return (bool): account verified flag
+        '''
+
+        return cls.email_verified
+
+
+    def is_logged_in(cls: Self) -> bool:
+        '''
+        Checks whether an account is already in use
+
+        cls (Self): the sqlalchemy table class
+
+        return (bool): account logged in flag
+        '''
+
+        return cls.user_status in ['Active']
 
 
 class UserLoginAttempts(Base):
     '''
     The table for all failed login attempts related to an account within the application.
-    
     '''
 
     __tablename__ = "user_login_attempts"

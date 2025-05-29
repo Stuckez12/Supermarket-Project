@@ -1,11 +1,17 @@
+'''
+Contains the function to create both the database
+and get a connection to the database.
+'''
+
 import os
 
+from collections.abc import Generator
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from contextlib import contextmanager
-from sqlalchemy.sql import text
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
+from sqlalchemy.sql import text
 
 
 DATABASE_NAME = os.environ.get('ACCOUNT_DB_NAME')
@@ -41,15 +47,32 @@ Base = declarative_base()
 
 # Dependency to get DB session
 @contextmanager
-def get_db_conn():
+def get_db_conn() -> Generator[Session, None, None]:
+    '''
+    This file gives out the object connection to the specified database
+    
+    yeild (Session, None, None): only yeilds the database connection
+    '''
+
     db = SessionLocal()
+
     try:
         yield db
+
     finally:
         db.close()
 
 
-def database_initialization(database_name=DATABASE_NAME):
+def database_initialization(database_name: str=DATABASE_NAME) -> None:
+    '''
+    This function checks whether the database has been created.
+    If not the database is created on server startup.
+
+    database_name (str): url route to the desired database
+
+    return (None):
+    '''
+
     print('Initializing Database And Connection')
 
     checking_engine = create_engine(POSTGRES_DATABASE_URL, isolation_level="AUTOCOMMIT")

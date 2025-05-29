@@ -1,5 +1,9 @@
 '''
-
+This file holds all the unique ServerCommunication
+instances that communicate to all gRPC servers.
+If any service wants to send a message to a gRPC service,
+they must fetch the clients initialised in this file and
+save the object in their internal server.
 '''
 
 import os

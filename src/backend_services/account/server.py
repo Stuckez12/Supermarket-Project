@@ -1,19 +1,37 @@
+'''
+The main root file for the specified gRPC account server
+'''
+
 import os
 import grpc
 
 from concurrent import futures
 
-from src.backend_services.account.database.database import Base, engine, database_initialization
+from src.backend_services.account.database.database import database_initialization, Base, engine
 from src.backend_services.account.authentication.login import UserAuthentication_Service
 from src.backend_services.common.proto import user_login_pb2_grpc
 
 
-def add_services(server):
+def add_services(server: grpc.Server) -> None:
+    '''
+    All the services to be added to the gRPC server on startup.
+
+    server (grpc.Server): the server to add the services to
+
+    return (None):
+    '''
+
     user_login_pb2_grpc.add_UserAuthServiceServicer_to_server(UserAuthentication_Service(), server)
     print('Service Added: User-Authentication')
 
 
-def serve():
+def serve() -> None:
+    '''
+    Method to startup and initialise the gRPC server
+
+    return (None):
+    '''
+
     host = os.environ.get('ACCOUNT_HOST')
     port = os.environ.get('ACCOUNT_PORT')
     max_workers = int(os.environ.get('ACCOUNT_MAX_WORKERS'))

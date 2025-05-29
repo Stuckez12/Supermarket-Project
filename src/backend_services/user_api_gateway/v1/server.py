@@ -1,3 +1,7 @@
+'''
+The root file to run the FastAPI user_api_gateway server v1
+'''
+
 import os
 import uvicorn
 
@@ -10,12 +14,7 @@ from src.backend_services.user_api_gateway.v1.routes.account.authentication impo
 app = FastAPI(redirect_slashes=False)
 
 
-
 app.state.account_grpc_client = account_client
-
-
-
-
 
 
 # All routers for the gateway server

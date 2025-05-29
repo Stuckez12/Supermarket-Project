@@ -1,9 +1,16 @@
+'''
+File containing a class to validate all types of data.
+'''
+
 import dns.resolver
 import uuid
 
 from datetime import datetime, timezone
 from enum import Enum
 from math import inf as INFINITY
+from typing import Any, Callable, Self, Tuple, TypeVar
+
+ENUM_CLASS = TypeVar('Enum Class', bound=Enum)
 
 
 # May be moved to seperate file
@@ -14,12 +21,12 @@ class CharReqEnum(Enum):
 
 
     @classmethod
-    def from_name(cls, name):
+    def from_name(cls: Self, name: str):
         return cls.members.get(name.upper())
 
 
     @classmethod
-    def from_value(cls, value):
+    def from_value(cls: Self, value: Any):
         for member in cls:
             if member.value == value:
                 return member
@@ -37,12 +44,12 @@ class UnixNumberFormatEnum(Enum):
 
 
     @classmethod
-    def from_name(cls, name):
+    def from_name(cls: Self, name: str):
         return cls.members.get(name.upper())
 
 
     @classmethod
-    def from_value(cls, value):
+    def from_value(cls: Self, value: Any):
         for member in cls:
             if member.value == value:
                 return member
@@ -58,12 +65,12 @@ class NullBooleanEnum(Enum):
 
 
     @classmethod
-    def from_name(cls, name):
+    def from_name(cls: Self, name: str):
         return cls.members.get(name.upper())
 
 
     @classmethod
-    def from_value(cls, value):
+    def from_value(cls: Self, value: Any):
         for member in cls:
             if member.value == value:
                 return member
@@ -82,34 +89,61 @@ class DataVerification():
     '''
 
 
-    def set_min_restriction(cls, name, data, restrictions, rest_errors):
+    def set_min_restriction(cls: Self, default_value: int, restrictions: dict) -> int:
         '''
-        This function sets the minimum size a number can be.  
+        This function sets the minimum size a number can be.
+
+        cls (Self): the verification class
+        default_value (int): the default value to set the restriction to
+        restrictions (dict): the restrictions set on the data
+
+        return (int, list): the new restricted number
         '''
 
         if 'min_num' in restrictions:
-            return restrictions['min_num'], rest_errors
+            return restrictions['min_num']
 
-        return data, rest_errors
+        return default_value
 
-    
-    def set_max_restriction(cls, name, data, restrictions, rest_errors):
+
+    def set_max_restriction(cls: Self, default_value: int, restrictions: dict) -> int:
         '''
-        This function sets the maximum size a number can be. 
+        This function sets the maximum size a number can be.
+
+        cls (Self): the verification class
+        default_value (int): the default value to set the restriction to
+        restrictions (dict): the restrictions set on the data
+
+        return (int, list): the new restricted number
         '''
 
         if 'max_num' in restrictions:
-            return restrictions['max_num'], rest_errors
+            return restrictions['max_num']
 
-        return data, rest_errors
+        return default_value
 
 
-    def set_data_type_restriction(cls, name, restrictions, limit_to, rest_errors):
+    def set_data_type_restriction(
+            cls: Self,
+            name: str,
+            restrictions: dict,
+            limit_to: list[type],
+            rest_errors: list
+        ) -> Tuple[type, list]:
+
         '''
         This function sets the variable in the restrictions
         to the desired data type to check against.
         If it is unable to find the desired data type, it defaults
         to the first data type that is provided to the function.
+
+        cls (Self): the verification class
+        name (str): the name of the variable
+        restrictions (dict): the restrictions set on the data
+        limit_to (list[type]): how to treat the variable. e.g. for a number either int or float
+        rest_errors (list): the list of accumulated errors
+
+        return (type, list): the type to treat the data as and the errors
         '''
 
         if 'type' in restrictions:
@@ -122,30 +156,66 @@ class DataVerification():
         return limit_to[0], rest_errors
 
         
-    def set_enum_restriction(cls, name, ClassEnum: any, restrictions: dict, value: str, errors: list):
+    def set_enum_restriction(
+            cls: Self,
+            name: str,
+            ClassEnum: ENUM_CLASS,
+            restrictions: dict,
+            value: str,
+            rest_errors: list
+        ) -> Tuple[ENUM_CLASS, list]:
+
         '''
         This function converts an ENUM string to the class representation.
         If the specified value is not present in the restrictions, it
         assigns the output to the DEFAULT class value.
+
+        cls (Self): the verification class
+        name (str): the name of the variable
+        ClassEnum (ENUM_CLASS): a class holding custom enum values
+        restrictions (dict): the restrictions set on the data
+        value (str): the specified restriction
+        rest_errors (list): the total errors
+
+        return (ENUM_CLASS, list): the class based enum data and errors
         '''
 
         if value in restrictions:
             new_val = ClassEnum.from_value(restrictions[value])
 
             if new_val is None:
-                errors.append(f'DEV ERROR: {name}-restriction-{value} is invalid. {value} must be a value within CharReqEnum')
+                rest_errors.append(f'DEV ERROR: {name}-restriction-{value} is invalid. {value} must be a value within CharReqEnum')
 
-            return new_val, errors
+            return new_val, rest_errors
 
-        return ClassEnum.DEFAULT, errors
+        return ClassEnum.DEFAULT, rest_errors
 
 
-    def validate_char_requirement(cls, data, char_check_fn, requirement, name, char_req, data_errors):
+    def validate_char_requirement(
+            cls: Self,
+            data: str,
+            char_check_fn: Callable,
+            requirement: ENUM_CLASS,
+            name: str,
+            char_req: str,
+            data_errors: list
+        ) -> list:
+
         '''
         This function checks whether the characters (specified
         by the provided function) are present within a string.
         It uses the CharReqEnum state to check whether the characters
         should be present in the string or not included.
+
+        cls (Self): the verification class
+        data (str): the data to check
+        char_check_fn (Callable): the function to use to check character requirements
+        requirement (ENUM_CLASS): a specified class state. The class holds custom enum values
+        name (str): the name of the variable
+        char_req (str): the name of the requirement
+        data_errors (list): the total errors
+
+        return (list): the errors when applying restrictions
         '''
 
         if requirement == CharReqEnum.DEFAULT:
@@ -162,7 +232,7 @@ class DataVerification():
         return data_errors
 
 
-    def verify_data(cls: any, data: dict) -> tuple[bool, list]:
+    def verify_data(cls: Self, data: dict) -> Tuple[bool, list]:
         '''
         This function recieves nested dictionaries containing the
         variables and the expected data type and restrictions for
@@ -197,11 +267,10 @@ class DataVerification():
         in its respective dictionary. If the restriction is not defined
         then it will default to its origional value.
 
-        cls (any): 
-        data (dict):
-        opt (list): 
+        cls (Self): the verification class
+        data (dict): the data to check, including restrictions
 
-        return (any): 
+        return (bool, list): a success flag and the errors detected are returned
         '''
 
         total_errors = []
@@ -222,7 +291,7 @@ class DataVerification():
             if 'optional' in data_points:
                 if data_points['optional']:
                     optional = True
-
+ 
             if 'restrictions' in data_points:
                 restrictions = data_points['restrictions']
 
@@ -258,7 +327,13 @@ class DataVerification():
         return True, optional_errors
 
 
-    def verify_string_data(cls: any, name: str, data: any, restrictions: dict={}) -> tuple[bool, list]:
+    def verify_string_data(
+            cls: Self,
+            name: str,
+            data: Any,
+            restrictions: dict={}
+        ) -> Tuple[bool, list]:
+
         '''
         With the relevant restrictions and data, this function will verify
         the specified data checking that it is a string and return the
@@ -321,12 +396,12 @@ class DataVerification():
             - There must be **no presence** of this data.
             - The string must not contain this specific character type.
 
-        cls (any): the DataVerification class
-        name (str): the name of the data (variable name?)
-        data (any): the data to be verified
-        restrictions (dict): a dictionary of all the restrictions that can be applied
+        cls (Self): the verification class
+        name (str): the name of the data
+        data (Any): the data to be verified
+        restrictions (dict): a dictionary of all the restrictions to apply [default - {}]
 
-        return (bool, list): returns the status of the string check and a list of all the errors with the data
+        return (bool, list): returns a success flag and a list of errors detected
         '''
 
         if type(data) != str:
@@ -343,8 +418,8 @@ class DataVerification():
         rest_errors = []
 
         # Formatting Restrictions
-        min_len, rest_errors = cls.set_min_restriction(name, min_len, restrictions, rest_errors)
-        max_len, rest_errors = cls.set_max_restriction(name, max_len, restrictions, rest_errors)
+        min_len = cls.set_min_restriction(min_len, restrictions)
+        max_len = cls.set_max_restriction(max_len, restrictions)
         lower_case, rest_errors = cls.set_enum_restriction(name, CharReqEnum, restrictions, 'lower_case', rest_errors)
         upper_case, rest_errors = cls.set_enum_restriction(name, CharReqEnum, restrictions, 'upper_case', rest_errors)
         numbers, rest_errors = cls.set_enum_restriction(name, CharReqEnum, restrictions, 'numbers', rest_errors)
@@ -378,7 +453,13 @@ class DataVerification():
         return True, []
 
 
-    def verify_number_data(cls, name, data, restrictions={}):
+    def verify_number_data(
+            cls: Self,
+            name: str,
+            data: Any,
+            restrictions: dict={}
+        ) -> Tuple[bool, list]:
+
         '''
         With the relevant restrictions and data, this function will verify
         the specified data checking that it is a integer or float and
@@ -409,6 +490,13 @@ class DataVerification():
             - DEFAULT = INFINITY
             - Specifies the maximum size of the number. 
             - Must be larger than `min_num` if `min_num` is also provided.
+
+        cls (Self): the verification class
+        name (str): the name of the data
+        data (Any): the data to be verified
+        restrictions (dict): a dictionary of all the restrictions to apply [default - {}]
+
+        return (bool, list): returns a success flag and a list of errors detected
         '''
 
         # Default Restrictions
@@ -419,8 +507,8 @@ class DataVerification():
 
         # Formatting Restrictions
         data_type, rest_errors = cls.set_data_type_restriction(name, restrictions, [int, float], rest_errors)
-        min_num, rest_errors = cls.set_min_restriction(name, min_num, restrictions, rest_errors)
-        max_num, rest_errors = cls.set_max_restriction(name, max_num, restrictions, rest_errors)
+        min_num = cls.set_min_restriction(min_num, restrictions)
+        max_num = cls.set_max_restriction(max_num, restrictions)
 
         if data_type.__name__ == 'float':
             try:
@@ -453,9 +541,16 @@ class DataVerification():
         return True, []
 
 
-    def verify_email_data(cls, name, data):
+    def verify_email_data(cls: Self, name: str, data: Any) -> Tuple[bool, list]:
         '''
-        
+        This function will validate the incoming data
+        to check if it is a valid email.
+
+        cls (Self): the verification class
+        name (str): the name of the data
+        data (Any): the data to be verified
+
+        return (bool, list): returns a success flag and a list of errors detected
         '''
 
         if type(data) != str:
@@ -482,9 +577,16 @@ class DataVerification():
         return True, []
 
 
-    def verify_uuid4_string(cls, name, data):
+    def verify_uuid4_string(cls: Self, name: str, data: Any) -> Tuple[bool, list]:
         '''
-        
+        This function will validate the incoming data
+        to check if it is a valid uuid.
+
+        cls (Self): the verification class
+        name (str): the name of the data
+        data (Any): the data to be verified
+
+        return (bool, list): returns a success flag and a list of errors detected
         '''
 
         if type(data) != str:
@@ -514,22 +616,88 @@ class DataVerification():
             return True, []
 
 
-    def verify_unix(cls, name, data, restrictions={}):
+    def verify_unix(
+            cls: Self,
+            name: str,
+            data: Any,
+            restrictions: dict={}
+        ) -> Tuple[bool, list]:
+
         '''
-        restrictions:
-            allow_future
-            allow_past
-            min_time
-            - current_time (overrides all below restrictions for min_time)
-            - future
-            - past
-            - format
-            - value
-            max_time
-            - future
-            - past
-            - format
-            - value
+        This function verifies whether the unix time is between the defined
+        time values in relation to the current time.
+        The restrictions is built to be flexible by utilising the format to
+        modify the value into seconds, making it more easily understandable.
+        It is not mandatory to pass through all the restrictions that
+        are enforced onto the string.
+        You can pass through an empty restrictions dict which will then
+        default all the restrictions to their standard parameters.
+
+        Example Restriction: -
+
+        restrictions = {
+            allow_future: "TRUE",
+            max_time: {
+                future: "TRUE",
+                format: "HOURS",
+                value: 8
+            }
+        }
+
+        This checks whether the time provided is between
+        the present and 8 hours into the future.
+
+        Available Restrictions:
+        - **allow_future (str)**:
+            - DEFAULT = 'NONE'
+            - Determines whether future times are considered valid.
+
+        - **allow_past (str)**:
+            - DEFAULT = 'NONE'
+            - Determines whether past times are considered valid.
+
+        - **min_time (dict)**:
+            - Specifies the minimum allowable time value.
+            - **Overrides:** If `current_time` is specified, it takes precedence over all other fields.
+            - **Fields**:
+                - **current_time (bool)**:
+                    - DEFAULT = False
+                    - If True, the current system time is used as the minimum.
+                - **future (str)**:
+                    - DEFAULT = 'NONE'
+                    - Specifies whether the value should be applied to the future.
+                - **past (str)**:
+                    - DEFAULT = 'NONE'
+                    - Specifies whether the value should be applied to the past.
+                - **format (str)**:
+                    - DEFAULT = "SECONDS"
+                    - Specifies what unit of time to use.
+                - **value (int)**:
+                    - DEFAULT = 0
+                    - An integer in the specified `format` stating how long from the current time the value is.
+
+        - **max_time (dict)**:
+            - Specifies the maximum allowable time value.
+            - **Fields**:
+                - **future (str)**:
+                    - DEFAULT = 'NONE'
+                    - Specifies whether the value should be applied to the future.
+                - **past (str)**:
+                    - DEFAULT = 'NONE'
+                    - Specifies whether the value should be applied to the past.
+                - **format (str)**:
+                    - DEFAULT = "SECONDS"
+                    - Specifies what unit of time to use.
+                - **value (int)**:
+                    - DEFAULT = INFINITY
+                    - An integer in the specified `format` stating how long from the current time the value is.
+
+        cls (Self): the verification class
+        name (str): the name of the data
+        data (Any): the data to be verified
+        restrictions (dict): a dictionary of all the restrictions to apply [default - {}]
+
+        return (bool, list): returns a success flag and a list of errors detected
         '''
 
         def convert_unix_restr_to_limit(time_dir, format, value):
@@ -699,15 +867,62 @@ class DataVerification():
         return True, []
 
 
-    def verify_datetime_string(cls, name, data, restrictions={}):
+    def verify_datetime_string(
+            cls: Self,
+            name: str,
+            data: Any,
+            restrictions: dict={}
+        ) -> Tuple[bool, list]:
+
         '''
-        restrictions
-            date:
-            - min_date: str
-            - max_date: str
-            time:
-            - min_time: str
-            - max_time: str
+        With the relevant restrictions and data, this function will verify
+        the specified data checking that it is a valid datetime and return the
+        necessary errors if any.
+        It is not mandatory to pass through all the restrictions that
+        are enforced onto the datetime.
+        You can pass through an empty restrictions dict which will then
+        default all the restrictions to their standard parameters.
+
+        Example Restriction: -
+
+        restrictions = {
+            date: {
+                min_date: "2025-01-01",
+                max_date: "2025-12-31"
+            }
+        }
+
+        Available Restrictions:
+        - **date (dict)**:
+            - Specifies restrictions related to calendar dates.
+            - **Fields**:
+                - **min_date (str)**:
+                    - DEFAULT = 100 years in the past
+                    - The earliest allowed date in string format (e.g., "2025-01-01").
+                    - Must be in a consistent and parseable format (e.g., ISO 8601).
+                - **max_date (str)**:
+                    - DEFAULT = 100 years in the future
+                    - The latest allowed date in string format (e.g., "2025-12-31").
+                    - Must be in a consistent and parseable format (e.g., ISO 8601).
+
+        - **time (dict)**:
+            - Specifies restrictions related to time of day.
+            - **Fields**:
+                - **min_time (str)**:
+                    - DEFAULT = 00:00:00
+                    - The earliest allowed time in string format (e.g., "08:00").
+                    - Must follow a standard time format such as "HH:MM" or "HH:MM:SS".
+                - **max_time (str)**:
+                    - DEFAULT = 23:59:59
+                    - The latest allowed time in string format (e.g., "18:00").
+                    - Must follow a standard time format such as "HH:MM" or "HH:MM:SS".
+
+        cls (Self): the verification class
+        name (str): the name of the data
+        data (Any): the data to be verified
+        restrictions (dict): a dictionary of all the restrictions to apply [default - {}]
+
+        return (bool, list): returns a success flag and a list of errors detected
         '''
 
 

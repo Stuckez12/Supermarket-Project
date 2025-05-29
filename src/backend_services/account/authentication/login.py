@@ -1,10 +1,14 @@
-import grpc
+'''
+This file holds the generic authentication for a user on the gRPC account-service
+'''
+
 import json
 import os
 import uuid
 
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
+from typing import Self, Tuple
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.backend_services.account.database.database import get_db_conn
@@ -31,6 +35,16 @@ ATTEMPTS_BEFORE_LOCK = os.environ.get('ACCOUNT_MAX_LOGIN_ATTEMPTS')
 
 
 def reconfigure_adaptive_restrictions(): # TEMPORARY
+    '''
+    Temporary function until future implementation of
+    more advanced datetime checking.
+
+    Changes the config file for authentication to use
+    up to date time limits.
+
+    return (None):
+    '''
+
     global AUTH_VERIFY_CONFIG
 
     today = datetime.today()
@@ -42,7 +56,14 @@ def reconfigure_adaptive_restrictions(): # TEMPORARY
     AUTH_VERIFY_CONFIG['date_of_birth']['restrictions']['date']['max'] = max_date
 
 
-def initialise_file():
+def initialise_file() -> None:
+    '''
+    When the server is executed, the file fetches the
+    verification config and stores it in memory.
+
+    return (None):
+    '''
+
     schemas = load_yaml_file_as_dict("src/backend_services/account/verification_config/user_auth.yaml")
 
     global AUTH_VERIFY_CONFIG
@@ -58,9 +79,15 @@ def initialise_file():
 initialise_file()
 
 
-def send_and_store_otp_code(email, return_status, replace_message=True):
+def send_and_store_otp_code(email: str, return_status: HTTP_Response, replace_message: bool=True):
     '''
-    
+    Sends the OTP email to the client and saves the OTP ID onto redis for 10 mins.
+
+    email (str): the provided users email to validate
+    return_status (HTTP_Response): the response to send back to the client
+    replace_message (bool): whether to replace the error message with a generic message
+
+    return (bool, HTTP_Response): success flag and http status response message
     '''
 
     success, otp_id, message = generate_otp_email([email])
@@ -106,9 +133,15 @@ def send_and_store_otp_code(email, return_status, replace_message=True):
     return True, None
 
 
-def check_email_session_data(email, session_uuid, return_status):
+def check_email_session_data(email: str, session_uuid: str, return_status: HTTP_Response) -> Tuple[bool, HTTP_Response]:
     '''
-    
+    Checks whether the email provided and the session email is equal.
+
+    email (str): the provided users email to validate
+    session_uuid (str): the frontend clients session
+    return_status (HTTP_Response): the response to send back to the client
+
+    return (bool, HTTP_Response): success flag and http status response message
     '''
 
     success, message, redis_client = get_redis_conn()
@@ -157,9 +190,15 @@ def check_email_session_data(email, session_uuid, return_status):
     return True, None
 
 
-def iter_failed_attempt(session: Session, user: User):
+def iter_failed_attempt(session: Session, user: User) -> None:
     '''
-    
+    Calculates how long the account should be locked
+    for and records the failed attempt.
+
+    session (Session): the connection to the database
+    user (User): single row of the specified users data
+
+    return (None):
     '''
 
     failed_count = get_failed_attempts(session, user)
@@ -184,14 +223,14 @@ def iter_failed_attempt(session: Session, user: User):
     session.refresh(failed_login)
 
     
-def get_failed_attempts(session: Session, user: User):
+def get_failed_attempts(session: Session, user: User) -> int:
     '''
     This function gets all the recorded attempts to access the account.
     If it finds any that have expired, they are automatically
     removed from the database and not counted.
 
     session (Session): the connection to the database
-    user (User): the specified user (user row data)
+    user (User): single row of the specified users data
 
     return (int): total number of in-date failed attempts
     '''
@@ -217,9 +256,14 @@ def get_failed_attempts(session: Session, user: User):
     return total_attempts
 
 
-def unlock_account(session: Session, user: User):
+def unlock_account(session: Session, user: User) -> bool:
     '''
-    
+    Checks whether the account is locked and the locked_until timer has expired.
+
+    session (Session): the connection to the database
+    user (User): single row of the specified users data
+
+    return (bool): unlock account flag
     '''
 
     get_failed_attempts(session, user)
@@ -241,16 +285,21 @@ def unlock_account(session: Session, user: User):
 
 class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
     '''
-    This class holds all the grpc requests on the server side
+    This class holds all the gRPC requests on the server side
     in regards to user login and authentication.
     '''
 
 
-    def UserRegistration(self, request: user_login_pb2.UserRegistrationRequest, context: grpc.ServicerContext) -> user_login_pb2.UserRegistrationResponse:
+    def UserRegistration(cls: Self, request: user_login_pb2.UserRegistrationRequest) -> user_login_pb2.UserRegistrationResponse:
         '''
         This gRPC function recieves registration details from the request.
         The data recieved is validated and inserted into the database.
         If any errors arise then relevant error messages are returned.
+
+        cls (Self): the UserAuthentication_Service class
+        request (OTPRequest): the specified proto defined request message for the rpc call
+
+        return (UserRegistrationResponse): the proto Message response including user data and request status
         '''
 
         print("UserRegistration Request Made:")
@@ -334,11 +383,16 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
         return user_login_pb2.UserRegistrationResponse(status=return_status)
 
 
-    def UserLogin(self, request: user_login_pb2.UserLoginRequest, context: grpc.ServicerContext) -> user_login_pb2.UserLoginResponse:
+    def UserLogin(cls: Self, request: user_login_pb2.UserLoginRequest) -> user_login_pb2.UserLoginResponse:
         '''
         This gRPC function recieves login details from the request.
         The data recieved is validated and inserted into the database.
         If any errors arise then relevant error messages are returned.
+
+        cls (Self): the UserAuthentication_Service class
+        request (OTPRequest): the specified proto defined request message for the rpc call
+
+        return (UserLoginResponse): the proto Message response including user data and request status
         '''
 
         print("UserLogin Request Made:")
@@ -448,11 +502,16 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             )
 
 
-    def OTPVerification(self, request: user_login_pb2.OTPRequest, context: grpc.ServicerContext) -> user_login_pb2.UserLoginResponse:
+    def OTPVerification(cls: Self, request: user_login_pb2.OTPRequest) -> user_login_pb2.UserLoginResponse:
         '''
         This gRPC function recieves login details from the request.
         The data recieved is validated and inserted into the database.
         If any errors arise then relevant error messages are returned.
+
+        cls (Self): the UserAuthentication_Service class
+        request (OTPRequest): the specified proto defined request message for the rpc call
+
+        return (UserLoginResponse): the proto Message response including user data and request status
         '''
 
         print("OTPVerification Request Made:")
@@ -555,11 +614,16 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
         return user_login_pb2.UserLoginResponse(status=return_status, user=user, session=user_session, otp_required=False)
 
 
-    def UserLogout(self, request: user_login_pb2.UserLogoutRequest, context: grpc.ServicerContext) -> HTTP_Response:
+    def UserLogout(cls: Self, request: user_login_pb2.UserLogoutRequest) -> HTTP_Response:
         '''
         This gRPC function recieves login details from the request.
         The data recieved is validated and inserted into the database.
         If any errors arise then relevant error messages are returned.
+
+        cls (Self): the UserAuthentication_Service class
+        request (UserLogoutRequest): the specified proto defined request message for the rpc call
+
+        return (HTTP_Response): the basic proto Message response indicating a successful or failed request
         '''
 
         print("OTPVerification Request Made:")

@@ -1,7 +1,13 @@
+'''
+This file holds the method to get a connection to the redis server.
+'''
+
 import os
 import redis
 
+from redis import Redis
 from redis.exceptions import ConnectionError, AuthenticationError
+from typing import Tuple, Union
 
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
@@ -13,9 +19,12 @@ REDIS_DB = os.environ.get('REDIS_DB')
 REDIS_URL = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
 
 
-def get_redis_conn():
+def get_redis_conn() -> Tuple[bool, str, Union[Redis, None]]:
     '''
-    
+    This gets the connection to the redis server and returns
+    the object used to communicate to the server.
+
+    returns (bool, str, [Redis, None]): success flag, message and a redis object to the redis server
     '''
 
     status = False

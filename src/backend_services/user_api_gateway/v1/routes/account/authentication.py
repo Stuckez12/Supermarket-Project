@@ -1,10 +1,18 @@
-import base64
+'''
+Routes from HTTP requests to the account gRPC server.
+This file holds the routes for all authentication of
+a user within the gateway API server.
+'''
+
 import json
 
 from fastapi import APIRouter, Response, Cookie, Depends
+from google.protobuf.message import Message
 from pydantic import BaseModel
 
+from src.backend_services.common.gRPC.server_connection import ServerCommunication
 from src.backend_services.common.proto import user_login_pb2
+
 
 from src.backend_services.user_api_gateway.v1.utils.get_clients import get_grpc_account_client
 
@@ -13,7 +21,7 @@ router = APIRouter()
 
 class RegisterRequest(BaseModel):
     '''
-    
+    The expected data to receive from the user.
     '''
 
     email: str
@@ -26,7 +34,7 @@ class RegisterRequest(BaseModel):
 
 class LoginRequest(BaseModel):
     '''
-    
+    The expected data to receive from the user.
     '''
 
     email: str
@@ -35,7 +43,7 @@ class LoginRequest(BaseModel):
 
 class OTPEmailRequest(BaseModel):
     '''
-    
+    The expected data to receive from the user.
     '''
     
     email: str
@@ -43,12 +51,17 @@ class OTPEmailRequest(BaseModel):
     return_action: str
 
 
-def get_status_response_data(data, embeded=True):
+def get_status_response_data(data: Message, embedded: bool=True) -> dict:
     '''
-    
+    Converts HTTP gRPC response messages into a dict ready to send to the client
+
+    data (Message): google gRPC response message
+    embedded (bool): whether the message is embedded or standalone [default - True]
+
+    return (dict): formatted data in a dict
     '''
 
-    if embeded:
+    if embedded:
         return {
             'success': data.status.success,
             'http_status': data.status.http_status,
@@ -64,9 +77,13 @@ def get_status_response_data(data, embeded=True):
     }
 
 
-def get_user_response_data(data):
+def get_user_response_data(data: Message) -> dict:
     '''
-    
+    Converts user gRPC response messages into a dict ready to send to the client
+
+    data (Message): google gRPC response message
+
+    return (dict): formatted data in a dict
     '''
 
     return {
@@ -86,9 +103,13 @@ def get_user_response_data(data):
     }
 
 
-def get_session_response_data(data):
+def get_session_response_data(data: Message) -> dict:
     '''
-    
+    Converts session gRPC response messages into a dict ready to send to the client
+
+    data (Message): google gRPC response message
+
+    return (dict): formatted data in a dict
     '''
 
     return {
@@ -98,9 +119,16 @@ def get_session_response_data(data):
 
 
 @router.post('/register')
-async def register_user(request_data: RegisterRequest, response: Response, client = Depends(get_grpc_account_client)):
+async def register_user(request_data: RegisterRequest, response: Response, client: ServerCommunication = Depends(get_grpc_account_client)) -> dict:
     '''
-    
+    Attempts to register a new user using the data provided by the client.
+    Newly created accounts need to be verified before use.
+
+    request_data (LoginRequest): class containing all the expected inputs from the client
+    response (Response): the response object FastAPI send to the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+
+    return (dict): returns a dict containing the response data
     '''
 
     data = user_login_pb2.UserRegistrationRequest(
@@ -119,7 +147,8 @@ async def register_user(request_data: RegisterRequest, response: Response, clien
             'status': {
                 'success': False,
                 'http_status': 502,
-                'message': 'Service Unavailable'
+                'message': 'Service Unavailable',
+                'service_response': get_status_response_data(data, embedded=False)
             }
         }
 
@@ -132,9 +161,16 @@ async def register_user(request_data: RegisterRequest, response: Response, clien
 
 
 @router.post('/login')
-async def login_user(request_data: LoginRequest, response: Response, client = Depends(get_grpc_account_client)):
+async def login_user(request_data: LoginRequest, response: Response, client: ServerCommunication = Depends(get_grpc_account_client)) -> dict:
     '''
-    
+    Attempts to log in the client to the account with
+    the specified account details provided.
+
+    request_data (LoginRequest): class containing all the expected inputs from the client
+    response (Response): the response object FastAPI send to the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+
+    return (dict): returns a dict containing the response data
     '''
 
     data = user_login_pb2.UserLoginRequest(
@@ -149,7 +185,8 @@ async def login_user(request_data: LoginRequest, response: Response, client = De
             'status': {
                 'success': False,
                 'http_status': 502,
-                'message': 'Service Unavailable'
+                'message': 'Service Unavailable',
+                'service_response': get_status_response_data(data, embedded=False)
             }
         }
 
@@ -167,12 +204,20 @@ async def login_user(request_data: LoginRequest, response: Response, client = De
 async def otp_verification(
     request_data: OTPEmailRequest,
     response: Response,
-    client = Depends(get_grpc_account_client),
+    client: ServerCommunication = Depends(get_grpc_account_client),
     session: str = Cookie(default=None)
-    ):
+    ) -> dict:
 
     '''
-    
+    Verifies the otp code sent by the client to verify the account.
+    Sets cookies regarding the account specified by the client.
+
+    request_data (OTPEmailRequest): class containing all the expected inputs from the client
+    response (Response): the response object FastAPI send to the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+    session (str): the session object containing the session_uuid and expiry time [default - No Cookie]
+
+    return (dict): returns a dict containing the response data
     '''
 
     if session is None and request_data.return_action == 'LOGIN':
@@ -215,7 +260,8 @@ async def otp_verification(
             'status': {
                 'success': False,
                 'http_status': 502,
-                'message': 'Service Unavailable'
+                'message': 'Service Unavailable',
+                'service_response': get_status_response_data(data, embedded=False)
             }
         }
 
@@ -233,13 +279,22 @@ async def otp_verification(
 @router.post('/logout')
 async def logout_user(
         response: Response,
-        client = Depends(get_grpc_account_client),
+        client: ServerCommunication = Depends(get_grpc_account_client),
         session: str = Cookie(default=None),
         user: str = Cookie(default=None)
-    ):
+    ) -> dict:
 
     '''
-    
+    Logs out a signed in user by accessing the
+    account-service and updating the relevant cookies.
+    Deletes the cookies related to the account when logged out.
+
+    response (Response): the response object FastAPI send to the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+    session (str): the session object containing the session_uuid and expiry time [default - No Cookie]
+    user (str): the user object containing the users public data [default - No Cookie]
+
+    return (dict): returns a dict containing the response data
     '''
 
     if None in [session, user]:
@@ -247,9 +302,7 @@ async def logout_user(
             'status': {
                 'success': False,
                 'http_status': 401,
-                'message': 'You Must Be Logged In To Logout',
-                'session': session,
-                'user': user
+                'message': 'You Must Be Logged In To Logout'
             }
         }
 
@@ -278,11 +331,12 @@ async def logout_user(
             'status': {
                 'success': False,
                 'http_status': 502,
-                'message': 'Service Unavailable'
+                'message': 'Service Unavailable',
+                'service_response': get_status_response_data(data, embedded=False)
             }
         }
 
     response.delete_cookie(key="user")
     response.delete_cookie(key="session")
 
-    return get_status_response_data(data, embeded=False)
+    return get_status_response_data(data, embedded=False)

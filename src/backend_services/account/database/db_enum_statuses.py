@@ -1,3 +1,7 @@
+'''
+All sqlalchemy database Enums used in database tables
+'''
+
 from sqlalchemy import Enum
 
 

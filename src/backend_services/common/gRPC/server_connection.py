@@ -1,12 +1,18 @@
 '''
-
+This file holds a class that is used to communicate to different gRPC servers.
 '''
 
 import grpc
 import random
 import time
 
+from google.protobuf.message import Message
+from typing import Callable, Self, Tuple, TypeVar, Union
+
 from src.backend_services.common.proto.input_output_messages_pb2 import HTTP_Response
+
+
+STUB = TypeVar("gRPC Stubs")
 
 
 DEFAULT_CHANNEL_OPTIONS = [
@@ -63,13 +69,22 @@ DEFAULT_CHANNEL_OPTIONS = [
     # Time is in milliseconds (default - 4 seconds)
     ('grpc.max_reconnect_backoff_ms', 4000)
 ]
-DEFAULT_CHANNEL_OPTIONS = [('grpc.keepalive_permit_without_calls', 0)]
-
 
 
 class ServerCommunication():
     '''
-    
+    This class is used to communicate to a gRPC server and
+    receive the desired results from the data given with
+    the specified request made. It creates a channel to the
+    specified server (secure or insecure) and retries sending
+    the request until either a successful response was given
+    or the max ammount of attempts were used.
+
+    When a failed response is received, depending on the error,
+    it reconnects to the server which ensures that the
+    connection was not the issue. This class should only be
+    initialised once on startup and then called upon by the
+    running server when it is needed.
     '''
 
     host = None
@@ -80,9 +95,31 @@ class ServerCommunication():
     channel = None
     stub = None
 
-    def __init__(cls, channel_host, channel_port, grpc_stub, channel_secure=False, server_certificate=None, rpc_max_retries=3, channel_options=DEFAULT_CHANNEL_OPTIONS):
+    def __init__(
+            cls: Self,
+            channel_host: str,
+            channel_port: str,
+            grpc_stub: Callable[[], STUB],
+            channel_secure: bool=False,
+            server_certificate: str=None,
+            rpc_max_retries: int=3,
+            channel_options: list=DEFAULT_CHANNEL_OPTIONS
+        ) -> None:
+
         '''
-        
+        Initialising the class by receiving all the variables required
+        to create and send a request to the targeted gRPC server.
+
+        cls (Self): the ServerCommunication class
+        channel_host (str): the host used to call the server
+        channel_port (str): what port the server is located on within the host
+        grpc_stub (Callable): a gRPC stub class that has yet to be executed
+        channel_secure (bool): whethewr to use a secure channel or an insecure channel [default - False]
+        server_certificate (str): the root to the servers certificate [default - None]
+        rpc_max_retries (int): how many times should the request be attempted [default - 3]
+        channel_options (list): a list of gRPC channel options [default - DEFAULT_CHANNEL_OPTIONS]
+
+        return (None): Nothing is returned
         '''
 
         cls.host = channel_host
@@ -109,9 +146,15 @@ class ServerCommunication():
         cls.reconnect()
 
 
-    def reconnect(cls):
+    def reconnect(cls: Self) -> None:
         '''
-        
+        Attempts to connect to the specified server using
+        either a secure channel or insecure channel.
+        Once connected, it then initialises a gRPC stub.
+
+        cls (Self): the ServerCommunication class
+
+        return (None): Nothing is returned
         '''
 
         url = cls.host + ':' + cls.port
@@ -125,9 +168,30 @@ class ServerCommunication():
         cls.stub = cls.stub_class(cls.channel)
 
 
-    def grpc_request(cls, request, data):
+    def grpc_request(
+            cls: Self,
+            request: Union[str, Callable],
+            data: Message
+        ) -> Tuple[bool, Union[Message, HTTP_Response]]:
+
         '''
-        
+        With the provided method and data, it sends one request
+        to the dedicated server and receives a single response.
+        Depending on the result of the request, the function either
+        returns a successful response from the server or retries
+        the request.
+
+        However if unable to or too many retries have been attempted,
+        the function returns a false response with an HTTP_Response
+        error in regards to the last erroneous gRPC call.
+
+        cls (Self): the ServerCommunication class
+        request (str, Callable):
+            the request is the function to call the gRPC server.
+            it can either be a string or the actual calling method.
+        data (Message): the proto data structure containing the message request data
+
+        return (bool, [Message, HTTP_Response]): Nothing is returned
         '''
 
         retryable_errors = [

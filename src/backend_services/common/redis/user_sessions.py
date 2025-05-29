@@ -1,14 +1,28 @@
+'''
+This file handles the creation and management
+of redis sessions that the frontend clients.
+'''
+
 import json
 import uuid
 
 from datetime import datetime, timedelta, UTC
+from typing import Tuple
 
+from src.backend_services.account.database.models import User
+from src.backend_services.common.proto.user_login_pb2 import UserData
 from src.backend_services.common.redis.redis import get_redis_conn
 
 
-def create_session(user_uuid, user_data):
+def create_session(user_uuid: str, user_data: User) -> Tuple[str, int]:
     '''
-    
+    Creates two session instances with an hour time limit.
+    An instance each for the user data and whether the user has been verified.
+
+    user_uuid (str): the users uuid
+    user_data (User): an sqlalchemy object containing one row for the specified users data
+
+    return (str, int): the session uuid and the expiry time
     '''
 
     success, message, redis_client = get_redis_conn()
@@ -34,9 +48,16 @@ def create_session(user_uuid, user_data):
     return session_uuid, unix_time
 
 
-def update_session(session_uuid, user_uuid, user_data):
+def update_session(session_uuid: str, user_uuid: str, user_data: User):
     '''
-    
+    Updates the two existing session instances with an hour time limit.
+    An instance each for the user data and whether the user has been verified.
+
+    session_uuid (str): the clients session uuid identifier
+    user_uuid (str): the users uuid
+    user_data (User): an sqlalchemy object containing one row for the specified users data
+
+    return (str, int): the session uuid and the expiry time
     '''
 
     success, message, redis_client = get_redis_conn()
@@ -61,9 +82,14 @@ def update_session(session_uuid, user_uuid, user_data):
     return session_uuid, unix_time
 
 
-def delete_session(session_uuid, user_uuid):
+def delete_session(session_uuid: str, user_uuid: str) -> Tuple[bool, str]:
     '''
-    
+    Deletes the sessions linked to the user.
+
+    session_uuid (str): the clients session uuid identifier
+    user_uuid (str): the users uuid
+
+    return (bool, str): the success flag and a message
     '''
 
     success, message, redis_client = get_redis_conn()
@@ -84,9 +110,13 @@ def delete_session(session_uuid, user_uuid):
     return True, 'User Logged Out'
 
 
-def user_to_json(user):
+def user_to_json(user: UserData) -> dict:
     '''
-    
+    Converts the gRPC UserData Message into a dict.
+
+    user (UserData): the response message from the gRPC server
+
+    return (dict): a dict of the users public details
     '''
 
     return {
