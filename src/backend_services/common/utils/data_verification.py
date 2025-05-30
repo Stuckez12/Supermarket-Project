@@ -103,6 +103,9 @@ class DataVerification():
         if 'min_num' in restrictions:
             return restrictions['min_num']
 
+        elif 'min_len' in restrictions:
+            return restrictions['min_len']
+
         return default_value
 
 
@@ -119,6 +122,9 @@ class DataVerification():
 
         if 'max_num' in restrictions:
             return restrictions['max_num']
+
+        elif 'max_len' in restrictions:
+            return restrictions['max_len']
 
         return default_value
 
@@ -251,8 +257,7 @@ class DataVerification():
                     lower_case: "MUST",
                     upper_case: "MUST",
                     numbers: "DEFAULT",
-                    symbols: "NONE",
-                    email: "DEFAULT"
+                    symbols: "NONE"
                 }
             },
             {
@@ -427,6 +432,9 @@ class DataVerification():
 
         if max_len < min_len:
             rest_errors.append(f'DEV ERROR: {name}-restriction-len_limits is invalid. max_len must be >= min_len')
+
+        if min_len < 0:
+            rest_errors.append(f'DEV ERROR: {name}-restriction-min_len is invalid. min_len must be a positive integer')
 
         if len(rest_errors) != 0:
             return False, rest_errors
@@ -867,6 +875,7 @@ class DataVerification():
         return True, []
 
 
+    # TODO: Rework Needed (Function Similarlly To verify_unix Restrictions)
     def verify_datetime_string(
             cls: Self,
             name: str,

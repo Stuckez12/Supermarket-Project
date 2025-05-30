@@ -34,7 +34,7 @@ LOGOUT_VERIFY_CONFIG = None
 ATTEMPTS_BEFORE_LOCK = os.environ.get('ACCOUNT_MAX_LOGIN_ATTEMPTS')
 
 
-def reconfigure_adaptive_restrictions(): # TEMPORARY
+def reconfigure_adaptive_restrictions() -> None: # TEMPORARY
     '''
     Temporary function until future implementation of
     more advanced datetime checking.
