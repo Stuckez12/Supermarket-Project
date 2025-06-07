@@ -2,6 +2,7 @@
 This file holds the generic authentication for a user on the gRPC account-service
 '''
 
+import grpc
 import json
 import os
 import uuid
@@ -14,7 +15,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from src.backend_services.account.database.database import get_db_conn
 from src.backend_services.account.database.models import User, UserLoginAttempts
 
-from src.backend_services.common.email.email_functions import generate_otp_email
+from src.backend_services.common.email.microsoft_azure.email_functions import generate_otp_email
 from src.backend_services.common.email.otp_functions import verify_otp_code
 from src.backend_services.common.proto import user_login_pb2, user_login_pb2_grpc
 from src.backend_services.common.proto.input_output_messages_pb2 import HTTP_Response
@@ -90,11 +91,12 @@ def send_and_store_otp_code(email: str, return_status: HTTP_Response, replace_me
     return (bool, HTTP_Response): success flag and http status response message
     '''
 
-    success, otp_id, message = generate_otp_email([email])
+    # This line of code will need to be modified to accept different types of email services
+    success, http_status, message, otp_id = generate_otp_email([{"address": email}])
 
     if not success:
-        return_status.success = False
-        return_status.http_status = 500
+        return_status.success = success
+        return_status.http_status = http_status
 
         if replace_message:
             return_status.message = 'Unable To Send Verification Email'
@@ -290,7 +292,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
     '''
 
 
-    def UserRegistration(cls: Self, request: user_login_pb2.UserRegistrationRequest) -> user_login_pb2.UserRegistrationResponse:
+    def UserRegistration(cls: Self, request: user_login_pb2.UserRegistrationRequest, context: grpc.ServicerContext) -> user_login_pb2.UserRegistrationResponse:
         '''
         This gRPC function recieves registration details from the request.
         The data recieved is validated and inserted into the database.
@@ -383,7 +385,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
         return user_login_pb2.UserRegistrationResponse(status=return_status)
 
 
-    def UserLogin(cls: Self, request: user_login_pb2.UserLoginRequest) -> user_login_pb2.UserLoginResponse:
+    def UserLogin(cls: Self, request: user_login_pb2.UserLoginRequest, context: grpc.ServicerContext) -> user_login_pb2.UserLoginResponse:
         '''
         This gRPC function recieves login details from the request.
         The data recieved is validated and inserted into the database.
@@ -502,7 +504,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             )
 
 
-    def OTPVerification(cls: Self, request: user_login_pb2.OTPRequest) -> user_login_pb2.UserLoginResponse:
+    def OTPVerification(cls: Self, request: user_login_pb2.OTPRequest, context: grpc.ServicerContext) -> user_login_pb2.UserLoginResponse:
         '''
         This gRPC function recieves login details from the request.
         The data recieved is validated and inserted into the database.
@@ -614,7 +616,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
         return user_login_pb2.UserLoginResponse(status=return_status, user=user, session=user_session, otp_required=False)
 
 
-    def UserLogout(cls: Self, request: user_login_pb2.UserLogoutRequest) -> HTTP_Response:
+    def UserLogout(cls: Self, request: user_login_pb2.UserLogoutRequest, context: grpc.ServicerContext) -> HTTP_Response:
         '''
         This gRPC function recieves login details from the request.
         The data recieved is validated and inserted into the database.

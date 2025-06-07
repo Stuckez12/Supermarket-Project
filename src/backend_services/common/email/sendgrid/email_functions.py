@@ -12,14 +12,14 @@ from src.backend_services.common.email.otp_functions import create_otp
 
 SENDGRID_EMAIL_API = os.environ.get('SENDGRID_EMAIL_API')
 SENDGRID_CLIENT = SendGridAPIClient(SENDGRID_EMAIL_API)
-EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
+SENDGRID_EMAIL_SENDER = os.environ.get('SENDGRID_EMAIL_SENDER')
 DEBUG_SEND_EMAIL = int(os.environ.get('DEBUG_SEND_EMAILS'))
 
 
 def create_email(
         to_emails: list[str],
         subject: str,
-        from_email: str=EMAIL_SENDER,
+        from_email: str=SENDGRID_EMAIL_SENDER,
         plain_context: str=None,
         html_context: str=None
     ) -> Mail:
@@ -29,7 +29,7 @@ def create_email(
 
     to_emails (list[str]): list of all end users to receive the email
     subject (str): the subject of the email
-    from_email (str): who is sending the email [default - EMAIL_SENDER]
+    from_email (str): who is sending the email [default - SENDGRID_EMAIL_SENDER]
     plain_context (str): basic plain text in the body of the email [default - None]
     html_context (str): html file as a string for the email body [default - None]
     '''
@@ -59,7 +59,7 @@ def send_email(email: Mail) -> Tuple[bool, int, str]:
     message = 'Email Sent Successfully'
 
     if not DEBUG_SEND_EMAIL:
-        return True, 202, message
+        return True, http_code, message
 
     try:
         SENDGRID_CLIENT.send(email)
