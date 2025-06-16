@@ -4,7 +4,7 @@ from python_http_client.exceptions import UnauthorizedError, ForbiddenError, \
     BadRequestsError, InternalServerError, ServiceUnavailableError, TooManyRequestsError
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from typing import Tuple
+from typing import Tuple, Union
 
 from src.backend_services.common.email.format_http_files import format_html_template
 from src.backend_services.common.email.otp_functions import create_otp
@@ -92,7 +92,7 @@ def send_email(email: Mail) -> Tuple[bool, int, str]:
     return success, http_code, message
 
 
-def generate_otp_email(send_to: list) -> Tuple[bool, int, str]:
+def sendgrid_otp_email(send_to: list) -> Tuple[bool, int, str, Union[str, None]]:
     '''
     Creates and sends an email containing the OTP code for
     the user to use to verify their account.
@@ -111,9 +111,9 @@ def generate_otp_email(send_to: list) -> Tuple[bool, int, str]:
 
     email = create_email(send_to, 'Verify Your Account', html_context=otp_template)
 
-    success, code, message = send_email(email)
+    success, http_status, message = send_email(email)
 
     if not success:
-        return success, None, message
+        return success, http_status, message, None
 
-    return success, otp_id, message
+    return success, http_status, message, otp_id

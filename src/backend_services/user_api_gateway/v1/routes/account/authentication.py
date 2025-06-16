@@ -229,10 +229,16 @@ async def otp_verification(
             }
         }
 
-    try:
-        session_dict = json.loads(session)
+    session_uuid = None
 
-    except json.JSONDecodeError:
+    try:
+        if session is not None:
+            session_dict = json.loads(session)
+
+            if request_data.return_action == 'LOGIN':
+                session_uuid = session_dict.get('session_uuid', None)
+
+    except (json.JSONDecodeError, TypeError):
         return {
             'status': {
                 'success': False,
@@ -240,11 +246,6 @@ async def otp_verification(
                 'message': 'Cookies Provided Incorrectly Formatted'
             }
         }
-    
-    session_uuid = None
-    
-    if request_data.return_action == 'LOGIN':
-        session_uuid = session_dict.get('session_uuid', None)
 
     data = user_login_pb2.OTPRequest(
         email=request_data.email,

@@ -14,6 +14,7 @@ from src.backend_services.common.gRPC.server_connection import ServerCommunicati
 
 from src.backend_services.common.proto.user_login_pb2_grpc import UserAuthServiceStub
 
+
 account_client = ServerCommunication(
     os.environ.get('ACCOUNT_SERVICE_NAME'),
     os.environ.get('ACCOUNT_PORT'),

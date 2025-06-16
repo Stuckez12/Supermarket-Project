@@ -15,7 +15,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from src.backend_services.account.database.database import get_db_conn
 from src.backend_services.account.database.models import User, UserLoginAttempts
 
-from src.backend_services.common.email.microsoft_azure.email_functions import generate_otp_email
+from src.backend_services.common.email.email_client import email_client
 from src.backend_services.common.email.otp_functions import verify_otp_code
 from src.backend_services.common.proto import user_login_pb2, user_login_pb2_grpc
 from src.backend_services.common.proto.input_output_messages_pb2 import HTTP_Response
@@ -91,8 +91,7 @@ def send_and_store_otp_code(email: str, return_status: HTTP_Response, replace_me
     return (bool, HTTP_Response): success flag and http status response message
     '''
 
-    # This line of code will need to be modified to accept different types of email services
-    success, http_status, message, otp_id = generate_otp_email([{"address": email}])
+    success, http_status, message, otp_id = email_client.send_otp_email([email])
 
     if not success:
         return_status.success = success
