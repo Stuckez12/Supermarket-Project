@@ -24,13 +24,15 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1binput_output_messages.proto\x12\x06\x63ommon\"U\n\rHTTP_Response\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0bhttp_status\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\x12\r\n\x05\x65rror\x18\x04 \x03(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1binput_output_messages.proto\x12\x0cinput_output\"U\n\rHTTP_Response\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0bhttp_status\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\x12\r\n\x05\x65rror\x18\x04 \x03(\t\"Q\n\x0cOTP_Response\x12+\n\x06status\x18\x01 \x01(\x0b\x32\x1b.input_output.HTTP_Response\x12\x14\n\x0cotp_required\x18\x02 \x01(\x08\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'input_output_messages_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_HTTP_RESPONSE']._serialized_start=39
-  _globals['_HTTP_RESPONSE']._serialized_end=124
+  _globals['_HTTP_RESPONSE']._serialized_start=45
+  _globals['_HTTP_RESPONSE']._serialized_end=130
+  _globals['_OTP_RESPONSE']._serialized_start=132
+  _globals['_OTP_RESPONSE']._serialized_end=213
 # @@protoc_insertion_point(module_scope)

@@ -21,7 +21,7 @@ For example:-
 
 
 
-## Technologies used
+## Technologies Used
 
 To Be Added
 

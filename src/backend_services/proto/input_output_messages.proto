@@ -14,3 +14,11 @@ message HTTP_Response
     // error contains all the error messages that may occur when performing the specified request
     repeated string error = 4;
 }
+
+// UpdateUserEmailRequest
+message OTP_Response {
+    // status
+    HTTP_Response status = 1;
+    // otp_required
+    bool otp_required = 2;
+}
