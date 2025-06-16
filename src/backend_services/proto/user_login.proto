@@ -1,0 +1,119 @@
+syntax = "proto3";
+package user_login;
+
+import "input_output_messages.proto";
+
+
+// UserRegistrationRequest
+message UserRegistrationRequest {
+    // email
+    string email = 1;
+    // password
+    string password = 2;
+    // first_name
+    string first_name = 3;
+    // last_name
+    string last_name = 4;
+    // gender
+    string gender = 5;
+    // date_of_birth
+    string date_of_birth = 6;
+}
+
+//
+message UserData {
+    // uuid
+    string uuid = 1;
+    // email
+    string email = 2;
+    // password_last_changed_at
+    int64 password_last_changed_at = 3;
+    // first_name
+    string first_name = 4;
+    // last_name
+    string last_name = 5;
+    // gender
+    string gender = 6;
+    // date_of_birth
+    string date_of_birth = 7;
+    // created_at
+    int64 created_at = 8;
+    // updated_at
+    int64 updated_at = 9;
+    // last_login
+    int64 last_login = 10;
+    // email_verified
+    bool email_verified = 11;
+    // user_status
+    string user_status = 12;
+    // user_role
+    string user_role = 13;
+}
+
+// UserRegistrationResponse
+message UserRegistrationResponse {
+    // success is boolean response that is returned stating if the request was successful or had failed
+    input_output.HTTP_Response status = 1;
+    // user contains all the relevant data that can be safely passed to the frontend
+    UserData user = 2;
+}
+
+// UserLoginRequest
+message UserLoginRequest {
+    // email
+    string email = 1;
+    // password
+    string password = 2;
+}
+
+// UserLoginResponse
+message UserLoginResponse {
+    // success is boolean response that is returned stating if the request was successful or had failed
+    input_output.HTTP_Response status = 1;
+    // user contains all the relevant data that can be safely passed to the frontend
+    UserData user = 2;
+    // session
+    UserSession session = 3;
+    // otp_required
+    bool otp_required = 4;
+}
+
+// UserLogoutRequest
+message UserLogoutRequest {
+    // session_uuid
+    string session_uuid = 1;
+    // user_uuid
+    string user_uuid = 2;
+}
+
+// OTPRequest
+message OTPRequest {
+    // email
+    string email = 1;
+    // otp_code
+    string otp_code = 2;
+    // session_uuid
+    string session_uuid = 3;
+    // return_action is to specify whether to log in or register
+    string return_action = 4;
+}
+
+// UserSession
+message UserSession {
+    // session_uuid
+    string session_uuid = 1;
+    // expiry_time
+    int64 expiry_time = 2;
+}
+
+// UserAuthService
+service UserAuthService {
+    // UserRegistration
+    rpc UserRegistration(UserRegistrationRequest) returns (UserRegistrationResponse) {}
+    // UserLogin
+    rpc UserLogin(UserLoginRequest) returns (UserLoginResponse) {}
+    // OTPVerification
+    rpc OTPVerification(OTPRequest) returns (UserLoginResponse) {}
+    // UserLogout
+    rpc UserLogout(UserLogoutRequest) returns (input_output.HTTP_Response) {}
+}

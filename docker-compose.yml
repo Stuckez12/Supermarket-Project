@@ -1,0 +1,87 @@
+services:
+  db:
+    image: postgres:17 
+    container_name: db
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    networks:
+      - pg-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+        POSTGRES_DB: ${DATABASE_NAME}
+        POSTGRES_USER: ${DATABASE_USERNAME}
+        POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        POSTGRES_PORT: ${DATABASE_PORT}
+    env_file: .env
+    attach: false
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pg-admin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    volumes:
+      - redis-data:/data
+    networks:
+      - pg-network
+    env_file: .env
+    attach: false
+
+  redis:
+    image: redis:latest
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - redis-data:/data
+    networks:
+      - redis-network
+    env_file: .env
+
+  customer_web_api_gateway:
+    build:
+        context: .
+        dockerfile: src/backend_services/user_api_gateway/v1/Dockerfile
+    container_name: customer_web_api_gateway
+    ports:
+      - ${CW_API_GWAY_PORT}:${CW_API_GWAY_PORT}
+    networks:
+      - pg-network
+      - redis-network
+      - grpc-network
+    depends_on:
+      - redis
+      - account-service
+    env_file: .env
+    attach: false
+
+  account-service:
+    build:
+        context: .
+        dockerfile: src/backend_services/account/Dockerfile
+    container_name: ${ACCOUNT_SERVICE_NAME}
+    ports:
+      - ${ACCOUNT_PORT}:${ACCOUNT_PORT}
+    networks:
+      - pg-network
+      - redis-network
+      - grpc-network
+    depends_on:
+      - db
+      - redis
+    env_file: .env
+    attach: false
+
+networks:
+  pg-network:
+  redis-network:
+  grpc-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis-data:

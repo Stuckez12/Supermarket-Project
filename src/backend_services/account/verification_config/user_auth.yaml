@@ -1,0 +1,78 @@
+auth:
+  uuid:
+    type: str_uuid
+  email:
+    type: email
+  password:
+    type: str
+    restrictions:
+      min_len: 8
+      max_len: 96
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'MUST'
+      symbols: 'DEFAULT'
+  first_name:
+    type: str
+    restrictions:
+        min_len: 2
+        max_len: 48
+        lower_case: 'MUST'
+        upper_case: 'MUST'
+        numbers: 'NONE'
+        symbols: 'DEFAULT'
+  last_name:
+    type: str
+    restrictions:
+      min_len: 2
+      max_len: 48
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'NONE'
+      symbols: 'DEFAULT'
+  gender:
+    type: str
+    restrictions:
+      min_len: 4
+      max_len: 20
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'NONE'
+      symbols: 'NONE'
+  date_of_birth:
+    type: datetime
+    restrictions:
+      date:
+        min: ADAPTIVE
+        max: ADAPTIVE
+
+otp:
+  email:
+    type: email
+  otp_code:
+    type: str
+    restrictions:
+      min_len: 6
+      max_len: 6
+      lower_case: 'NONE'
+      upper_case: 'NONE'
+      numbers: 'MUST'
+      symbols: 'NONE'
+  session_uuid:
+    type: str_uuid
+    optional: True
+  return_action:
+    type: str
+    restrictions:
+      min_len: 5
+      max_len: 8
+      lower_case: 'NONE'
+      upper_case: 'MUST'
+      numbers: 'NONE'
+      symbols: 'NONE'
+
+logout:
+  session_uuid:
+    type: str_uuid
+  user_uuid:
+    type: str_uuid

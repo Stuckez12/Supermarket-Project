@@ -1,0 +1,188 @@
+{
+    "Test_String_Validation": {
+        "Case 1": {
+            "type": "str",
+            "data": "",
+            "func_iter": [
+                {
+                    "restrictions": {},
+                    "func_result": [true, []]
+                }
+            ]
+        },
+        "Case 2": {
+            "type": "int",
+            "data": "123",
+            "func_iter": [
+                {
+                    "restrictions": {},
+                    "func_result": [false, ["Testing type is invalid. Expected str but received int"]]
+                }
+            ]
+        },
+        "Case 3": {
+            "type": "str",
+            "data": "String",
+            "func_iter": [
+                {
+                    "restrictions": {},
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "lower_case": "MUST", "upper_case": "DEFAULT", "numbers": "DEFAULT", "symbols": "DEFAULT" },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "lower_case": "DEFAULT", "upper_case": "MUST", "numbers": "DEFAULT", "symbols": "DEFAULT" },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "lower_case": "DEFAULT", "upper_case": "DEFAULT", "numbers": "MUST", "symbols": "DEFAULT" },
+                    "func_result": [false, ["Testing must contain at least one number"]]
+                },
+                {
+                    "restrictions": { "lower_case": "DEFAULT", "upper_case": "DEFAULT", "numbers": "DEFAULT", "symbols": "MUST" },
+                    "func_result": [false, ["Testing must contain at least one symbol"]]
+                }
+            ]
+        },
+        "Case 4": {
+            "type": "str",
+            "data": "String1.",
+            "func_iter": [
+                {
+                    "restrictions": { "min_len": 4, "max_len": 8 },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "min_len": 8, "max_len": 8 },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "min_len": 9, "max_len": 9 },
+                    "func_result": [false, ["Testing string length of 8 is too short. Minimum expected length is 9 characters"]]
+                },
+                {
+                    "restrictions": { "min_len": 7, "max_len": 7 },
+                    "func_result": [false, ["Testing string length of 8 is too long. Maximum expected length is 7 characters"]]
+                },
+                {
+                    "restrictions": { "min_len": 9, "max_len": 8 },
+                    "func_result": [false, ["DEV ERROR: Testing-restriction-len_limits is invalid. max_len must be >= min_len"]]
+                },
+                {
+                    "restrictions": { "min_len": -1, "max_len": -1 },
+                    "func_result": [false, ["DEV ERROR: Testing-restriction-min_len is invalid. min_len must be a positive integer"]]
+                },
+                {
+                    "restrictions": { "lower_case": "DEFAULT", "upper_case": "DEFAULT", "numbers": "DEFAULT", "symbols": "DEFAULT" },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "lower_case": "MUST", "upper_case": "MUST", "numbers": "MUST", "symbols": "MUST" },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "lower_case": "NONE", "upper_case": "DEFAULT", "numbers": "DEFAULT", "symbols": "DEFAULT" },
+                    "func_result": [false, ["Testing must not contain lower_case"]]
+                },
+                {
+                    "restrictions": { "lower_case": "DEFAULT", "upper_case": "NONE", "numbers": "DEFAULT", "symbols": "DEFAULT" },
+                    "func_result": [false, ["Testing must not contain upper_case"]]
+                },
+                {
+                    "restrictions": { "lower_case": "DEFAULT", "upper_case": "DEFAULT", "numbers": "NONE", "symbols": "DEFAULT" },
+                    "func_result": [false, ["Testing must not contain number"]]
+                },
+                {
+                    "restrictions": { "lower_case": "DEFAULT", "upper_case": "DEFAULT", "numbers": "DEFAULT", "symbols": "NONE" },
+                    "func_result": [false, ["Testing must not contain symbol"]]
+                }
+            ]
+        }
+    },
+    "Test_Number_Validation": {
+        "Case 1": {
+            "type": "int",
+            "data": "-1",
+            "func_iter": [
+                {
+                    "restrictions": {},
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "type": "int" },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "type": "int", "min_num": -10, "max_num": 10},
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "type": "int", "min_num": -1, "max_num": -1},
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "type": "int", "min_num": -2, "max_num": -2},
+                    "func_result": [false, ["Testing integer -1 is too large. Maximum expected number is -2"]]
+                },
+                {
+                    "restrictions": { "type": "int", "min_num": 0, "max_num": 0},
+                    "func_result": [false, ["Testing integer -1 is too small. Minimum expected number is 0"]]
+                },
+                {
+                    "restrictions": { "type": "int", "min_num": 1, "max_num": 0},
+                    "func_result": [false, ["DEV ERROR: Testing-restriction-len_limits is invalid. max_num must be >= min_num"]]
+                },
+                {
+                    "restrictions": { "type": "float", "min_num": -1, "max_num": -1},
+                    "func_result": [true, []]
+                }
+            ]
+        },
+        "Case 2": {
+            "type": "float",
+            "data": "0",
+            "func_iter": [
+                {
+                    "restrictions": {},
+                    "func_result": [false, ["Testing type is invalid. Expected int but received float"]]
+                },
+                {
+                    "restrictions": { "type": "float" },
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "type": "float", "min_num": -10, "max_num": 10},
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "type": "float", "min_num": 0, "max_num": 0},
+                    "func_result": [true, []]
+                },
+                {
+                    "restrictions": { "type": "float", "min_num": -1, "max_num": -1},
+                    "func_result": [false, ["Testing integer 0.0 is too large. Maximum expected number is -1"]]
+                },
+                {
+                    "restrictions": { "type": "float", "min_num": 1, "max_num": 1},
+                    "func_result": [false, ["Testing integer 0.0 is too small. Minimum expected number is 1"]]
+                },
+                {
+                    "restrictions": { "type": "int", "min_num": 0, "max_num": 0},
+                    "func_result": [false, ["Testing type is invalid. Expected int but received float"]]
+                }
+            ]
+        },
+        "Case 3": {
+            "type": "str",
+            "data": "Hello",
+            "func_iter": [
+                {
+                    "restrictions": {},
+                    "func_result": [false, ["Testing type is invalid. Expected int but received str"]]
+                }
+            ]
+        }
+    }
+}
