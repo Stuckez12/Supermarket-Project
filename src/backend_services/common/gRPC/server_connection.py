@@ -93,13 +93,11 @@ class ServerCommunication():
     options = []
 
     channel = None
-    stub = None
 
     def __init__(
             cls: Self,
             channel_host: str,
             channel_port: str,
-            grpc_stub: Callable[[], STUB],
             channel_secure: bool=False,
             server_certificate: str=None,
             rpc_max_retries: int=3,
@@ -113,7 +111,6 @@ class ServerCommunication():
         cls (Self): the ServerCommunication class
         channel_host (str): the host used to call the server
         channel_port (str): what port the server is located on within the host
-        grpc_stub (Callable): a gRPC stub class that has yet to be executed
         channel_secure (bool): whethewr to use a secure channel or an insecure channel [default - False]
         server_certificate (str): the root to the servers certificate [default - None]
         rpc_max_retries (int): how many times should the request be attempted [default - 3]
@@ -126,7 +123,6 @@ class ServerCommunication():
         cls.port = channel_port
 
         cls.stub = None
-        cls.stub_class = grpc_stub
 
         cls.secure_channel = channel_secure
         cls.certificate = None
@@ -165,12 +161,11 @@ class ServerCommunication():
         else:
             cls.channel = grpc.insecure_channel(url, options=cls.options)
 
-        cls.stub = cls.stub_class(cls.channel)
-
 
     def grpc_request(
             cls: Self,
             request: Union[str, Callable],
+            stub: Callable[[], STUB],
             data: Message
         ) -> Tuple[bool, Union[Message, HTTP_Response]]:
 
@@ -186,6 +181,7 @@ class ServerCommunication():
         error in regards to the last erroneous gRPC call.
 
         cls (Self): the ServerCommunication class
+        stub (Callable): a gRPC stub class that has yet to be executed
         request (str, Callable):
             the request is the function to call the gRPC server.
             it can either be a string or the actual calling method.
@@ -204,8 +200,10 @@ class ServerCommunication():
 
         for attempt in range(cls.max_retries):
             try:
+                stub_channel = stub(cls.channel)
+                
                 if isinstance(request, str):
-                    call_func = getattr(cls.stub, request)
+                    call_func = getattr(stub_channel, request)
 
                 else:
                     call_func = request

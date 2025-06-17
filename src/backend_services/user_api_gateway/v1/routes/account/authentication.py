@@ -7,16 +7,22 @@ a user within the gateway API server.
 import json
 
 from fastapi import APIRouter, Response, Cookie, Depends
-from google.protobuf.message import Message
+from functools import partial
 from pydantic import BaseModel
 
 from src.backend_services.common.gRPC.server_connection import ServerCommunication
+from src.backend_services.common.gRPC.data_conversion import get_session_response_data, \
+    get_status_response_data, get_user_response_data
 from src.backend_services.common.proto import user_login_pb2
+from src.backend_services.common.proto.user_login_pb2_grpc import UserAuthServiceStub
 
-
+from src.backend_services.user_api_gateway.v1.middleware.account import is_user_logged_in
+from src.backend_services.user_api_gateway.v1.routes.account.actions import router as settings_router
 from src.backend_services.user_api_gateway.v1.utils.get_clients import get_grpc_account_client
 
-router = APIRouter()
+
+router = APIRouter(prefix='/account')
+router.include_router(settings_router, prefix="/settings")
 
 
 class RegisterRequest(BaseModel):
@@ -51,73 +57,6 @@ class OTPEmailRequest(BaseModel):
     return_action: str
 
 
-def get_status_response_data(data: Message, embedded: bool=True) -> dict:
-    '''
-    Converts HTTP gRPC response messages into a dict ready to send to the client
-
-    data (Message): google gRPC response message
-    embedded (bool): whether the message is embedded or standalone [default - True]
-
-    return (dict): formatted data in a dict
-    '''
-
-    if embedded:
-        return {
-            'success': data.status.success,
-            'http_status': data.status.http_status,
-            'message': data.status.message,
-            'error': list(data.status.error)
-        }
-
-    return {
-        'success': data.success,
-        'http_status': data.http_status,
-        'message': data.message,
-        'error': list(data.error)
-    }
-
-
-def get_user_response_data(data: Message) -> dict:
-    '''
-    Converts user gRPC response messages into a dict ready to send to the client
-
-    data (Message): google gRPC response message
-
-    return (dict): formatted data in a dict
-    '''
-
-    return {
-        'uuid': data.user.uuid,
-        'email': data.user.email,
-        'password_last_changed_at': data.user.password_last_changed_at,
-        'first_name': data.user.first_name,
-        'last_name': data.user.last_name,
-        'gender': data.user.gender,
-        'date_of_birth': data.user.date_of_birth,
-        'created_at': data.user.created_at,
-        'updated_at': data.user.updated_at,
-        'last_login': data.user.last_login,
-        'email_verified': data.user.email_verified,
-        'user_status': data.user.user_status,
-        'user_role': data.user.user_role
-    }
-
-
-def get_session_response_data(data: Message) -> dict:
-    '''
-    Converts session gRPC response messages into a dict ready to send to the client
-
-    data (Message): google gRPC response message
-
-    return (dict): formatted data in a dict
-    '''
-
-    return {
-        'session_uuid': data.session.session_uuid,
-        'expiry_time': data.session.expiry_time
-    }
-
-
 @router.post('/register')
 async def register_user(request_data: RegisterRequest, response: Response, client: ServerCommunication = Depends(get_grpc_account_client)) -> dict:
     '''
@@ -140,7 +79,7 @@ async def register_user(request_data: RegisterRequest, response: Response, clien
         gender=request_data.gender
     )
 
-    success, data = client.grpc_request('UserRegistration', data)
+    success, data = client.grpc_request('UserRegistration', partial(UserAuthServiceStub), data)
 
     if not success:
         return {
@@ -178,7 +117,7 @@ async def login_user(request_data: LoginRequest, response: Response, client: Ser
         password=request_data.password
     )
 
-    success, data = client.grpc_request('UserLogin', data)
+    success, data = client.grpc_request('UserLogin', partial(UserAuthServiceStub), data)
 
     if not success:
         return {
@@ -254,7 +193,7 @@ async def otp_verification(
         return_action=request_data.return_action
     )
 
-    success, data = client.grpc_request('OTPVerification', data)
+    success, data = client.grpc_request('OTPVerification', partial(UserAuthServiceStub), data)
 
     if not success:
         return {
@@ -277,7 +216,7 @@ async def otp_verification(
     return { 'status': http_status, 'user': user, 'session': session, 'otp_required': data.otp_required }
 
 
-@router.post('/logout')
+@router.post('/logout', dependencies=[Depends(is_user_logged_in)])
 async def logout_user(
         response: Response,
         client: ServerCommunication = Depends(get_grpc_account_client),
@@ -325,7 +264,7 @@ async def logout_user(
         user_uuid=user_dict.get('uuid')
     )
 
-    success, data = client.grpc_request('UserLogout', data)
+    success, data = client.grpc_request('UserLogout', partial(UserAuthServiceStub), data)
 
     if not success:
         return {

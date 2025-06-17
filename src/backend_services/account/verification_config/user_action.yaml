@@ -1,0 +1,78 @@
+basic_data:
+  uuid:
+    type: str_uuid
+
+update_email:
+  uuid:
+    type: str_uuid
+  current_email:
+    type: email
+  new_email:
+    type: email
+
+update_password:
+  uuid:
+    type: str_uuid
+  current_password:
+    type: str
+    restrictions:
+      min_len: 8
+      max_len: 96
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'MUST'
+      symbols: 'DEFAULT'
+  new_password:
+    type: str
+    restrictions:
+      min_len: 8
+      max_len: 96
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'MUST'
+      symbols: 'DEFAULT'
+
+update_data:
+  uuid:
+    type: str_uuid
+  email:
+    type: email
+  first_name:
+    type: str
+    restrictions:
+        min_len: 2
+        max_len: 48
+        lower_case: 'MUST'
+        upper_case: 'MUST'
+        numbers: 'NONE'
+        symbols: 'DEFAULT'
+  last_name:
+    type: str
+    restrictions:
+      min_len: 2
+      max_len: 48
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'NONE'
+      symbols: 'DEFAULT'
+  gender:
+    type: str
+    restrictions:
+      min_len: 4
+      max_len: 20
+      lower_case: 'MUST'
+      upper_case: 'MUST'
+      numbers: 'NONE'
+      symbols: 'NONE'
+  date_of_birth:
+    type: datetime
+    restrictions:
+      date:
+        min: ADAPTIVE
+        max: ADAPTIVE
+
+delete_account:
+  uuid:
+    type: str_uuid
+  email:
+    type: email

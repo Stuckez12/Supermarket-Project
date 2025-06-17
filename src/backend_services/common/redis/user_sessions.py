@@ -7,7 +7,7 @@ import json
 import uuid
 
 from datetime import datetime, timedelta, UTC
-from typing import Tuple
+from typing import Tuple, Union
 
 from src.backend_services.account.database.models import User
 from src.backend_services.common.proto.user_login_pb2 import UserData
@@ -108,6 +108,41 @@ def delete_session(session_uuid: str, user_uuid: str) -> Tuple[bool, str]:
         return False, 'Unable To Log Out'
 
     return True, 'User Logged Out'
+
+
+def check_session(session_uuid: str, user_uuid: str) -> Tuple[bool, str]:
+    '''
+    Verifies whether the session that the
+    user currently has is valid and correct.
+
+    session_uuid (str): the clients session uuid identifier
+    user_uuid (str): the users uuid
+
+    return (bool, str): success flag and message
+    '''
+
+    session_id = f'sid:{session_uuid}:{user_uuid}'
+    success, message, redis_client = get_redis_conn()
+
+    if not success:
+        return False, message
+
+    redis_user_data = redis_client.get(session_id + ':user_data')
+    redis_verified = redis_client.get(session_id + ':verified')
+
+    if redis_user_data is None or redis_verified is None:
+        return False, 'Session Expired Or Invalid. Please Log In Again'
+
+    user_data = json.loads(redis_user_data.decode('utf-8'))
+    verified = json.loads(redis_verified.decode('utf-8'))
+
+    if user_data['uuid'] != user_uuid:
+        return False, 'Session Expired Or Invalid. Please Log In Again'
+
+    if not verified:
+        return False, 'Verify Your Account Before Performing This Action'
+
+    return True, 'Valid Session' 
 
 
 def user_to_json(user: UserData) -> dict:
