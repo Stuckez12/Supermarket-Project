@@ -54,7 +54,7 @@ class UserSettingsServiceStub(object):
         self.UpdateUserDetails = channel.unary_unary(
                 '/user_settings.UserSettingsService/UpdateUserDetails',
                 request_serializer=user__actions__pb2.UpdateUserDetailsRequest.SerializeToString,
-                response_deserializer=input__output__messages__pb2.HTTP_Response.FromString,
+                response_deserializer=user__actions__pb2.BasicAccountDetailsResponse.FromString,
                 _registered_method=True)
         self.DeleteAccount = channel.unary_unary(
                 '/user_settings.UserSettingsService/DeleteAccount',
@@ -123,7 +123,7 @@ def add_UserSettingsServiceServicer_to_server(servicer, server):
             'UpdateUserDetails': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateUserDetails,
                     request_deserializer=user__actions__pb2.UpdateUserDetailsRequest.FromString,
-                    response_serializer=input__output__messages__pb2.HTTP_Response.SerializeToString,
+                    response_serializer=user__actions__pb2.BasicAccountDetailsResponse.SerializeToString,
             ),
             'DeleteAccount': grpc.unary_unary_rpc_method_handler(
                     servicer.DeleteAccount,
@@ -239,7 +239,7 @@ class UserSettingsService(object):
             target,
             '/user_settings.UserSettingsService/UpdateUserDetails',
             user__actions__pb2.UpdateUserDetailsRequest.SerializeToString,
-            input__output__messages__pb2.HTTP_Response.FromString,
+            user__actions__pb2.BasicAccountDetailsResponse.FromString,
             options,
             channel_credentials,
             insecure,

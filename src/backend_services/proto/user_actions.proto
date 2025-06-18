@@ -73,7 +73,7 @@ service UserSettingsService {
     // UpdateUserPassword
     rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (input_output.HTTP_Response) {}
     // UpdateUserDetails
-    rpc UpdateUserDetails(UpdateUserDetailsRequest) returns (input_output.HTTP_Response) {}
+    rpc UpdateUserDetails(UpdateUserDetailsRequest) returns (BasicAccountDetailsResponse) {}
     // DeleteAccount
     rpc DeleteAccount(DeleteAccountRequest) returns (input_output.HTTP_Response) {}
 }

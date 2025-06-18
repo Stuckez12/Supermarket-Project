@@ -181,7 +181,7 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
         return None
 
 
-    def UpdateUserDetails(cls: Self, request: user_actions_pb2.UpdateUserDetailsRequest, context: grpc.ServicerContext) -> HTTP_Response:
+    def UpdateUserDetails(cls: Self, request: user_actions_pb2.UpdateUserDetailsRequest, context: grpc.ServicerContext) -> BasicAccountDetailsResponse:
         '''
         This gRPC function recieves a user uuid from the request.
         The data recieved is validated and data related to the user and return the users' data.
@@ -190,7 +190,7 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
         cls (Self): the UserAction_Service class
         request (UpdateUserDetailsRequest): the specified proto defined request message for the rpc call
 
-        return (HTTP_Response): the proto Message response including user data and request status
+        return (BasicAccountDetailsResponse): the proto Message response including user data and request status
         '''
 
         print("UpdateUserDetails Request Made:")
