@@ -15,6 +15,7 @@ from src.backend_services.common.gRPC.data_conversion import get_session_respons
     get_status_response_data, get_user_response_data
 from src.backend_services.common.proto import user_login_pb2
 from src.backend_services.common.proto.user_login_pb2_grpc import UserAuthServiceStub
+from src.backend_services.common.redis.fetch_session_data import get_session_user_data
 
 from src.backend_services.user_api_gateway.v1.middleware.account import is_user_logged_in
 from src.backend_services.user_api_gateway.v1.routes.account.actions import router as settings_router
@@ -259,9 +260,23 @@ async def logout_user(
             }
         }
 
+    session_uuid = session_dict.get('session_uuid')
+    user_uuid = user_dict.get('uuid')
+
+    success, message, session_user_data = get_session_user_data(session_uuid, user_uuid)
+
+    if not success:
+        return {
+            'status': {
+                'success': False,
+                'http_status': 400,
+                'message': message
+            }
+        }
+
     data = user_login_pb2.UserLogoutRequest(
-        session_uuid=session_dict.get('session_uuid'),
-        user_uuid=user_dict.get('uuid')
+        session_uuid=session_uuid,
+        user_uuid=session_user_data.get('uuid')
     )
 
     success, data = client.grpc_request('UserLogout', partial(UserAuthServiceStub), data)

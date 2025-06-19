@@ -12,6 +12,7 @@ from src.backend_services.common.gRPC.data_conversion import get_status_response
 from src.backend_services.common.gRPC.server_connection import ServerCommunication
 from src.backend_services.common.proto import user_actions_pb2
 from src.backend_services.common.proto.user_actions_pb2_grpc import UserSettingsServiceStub
+from src.backend_services.common.redis.fetch_session_data import get_session_user_data
 
 from src.backend_services.user_api_gateway.v1.middleware.account import is_user_logged_in
 from src.backend_services.user_api_gateway.v1.utils.get_clients import get_grpc_account_client
@@ -51,6 +52,7 @@ class ChangeDetailsRequest(BaseModel):
 @router.get('/fetch-data', dependencies=[Depends(is_user_logged_in)])
 async def fetch_user_data(
         client: ServerCommunication = Depends(get_grpc_account_client),
+        session: str = Cookie(),
         user: str = Cookie()
     ) -> dict:
 
@@ -58,10 +60,25 @@ async def fetch_user_data(
 
     '''
 
+    session_dict = json.loads(session)
     user_dict = json.loads(user)
 
+    session_uuid = session_dict.get('session_uuid')
+    user_uuid = user_dict.get('uuid')
+
+    success, message, session_user_data = get_session_user_data(session_uuid, user_uuid)
+
+    if not success:
+        return {
+            'status': {
+                'success': False,
+                'http_status': 400,
+                'message': message
+            }
+        }
+
     data = user_actions_pb2.GetBasicAccountDetailsRequest(
-        user_uuid=user_dict.get('uuid')
+        user_uuid=session_user_data.get('uuid')
     )
 
     success, data = client.grpc_request('GetBasicAccountData', partial(UserSettingsServiceStub), data)
@@ -87,6 +104,7 @@ async def change_user_email(
         request_data: ChangeEmailRequest,
         response: Response,
         client: ServerCommunication = Depends(get_grpc_account_client),
+        session: str = Cookie(),
         user: str = Cookie()
     ) -> dict:
 
@@ -94,11 +112,26 @@ async def change_user_email(
 
     '''
 
+    session_dict = json.loads(session)
     user_dict = json.loads(user)
 
+    session_uuid = session_dict.get('session_uuid')
+    user_uuid = user_dict.get('uuid')
+
+    success, message, session_user_data = get_session_user_data(session_uuid, user_uuid)
+
+    if not success:
+        return {
+            'status': {
+                'success': False,
+                'http_status': 400,
+                'message': message
+            }
+        }
+
     data = user_actions_pb2.UpdateUserEmailRequest(
-        user_uuid=user_dict.get('uuid'),
-        current_email=user_dict.get('email'),
+        user_uuid=session_user_data.get('uuid'),
+        current_email=session_user_data.get('email'),
         new_email=request_data.new_email
     )
 
@@ -127,6 +160,7 @@ async def change_user_email(
 async def change_user_password(
         request_data: ChangePasswordRequest,
         client: ServerCommunication = Depends(get_grpc_account_client),
+        session: str = Cookie(),
         user: str = Cookie()
     ) -> dict:
 
@@ -134,11 +168,26 @@ async def change_user_password(
 
     '''
 
+    session_dict = json.loads(session)
     user_dict = json.loads(user)
 
+    session_uuid = session_dict.get('session_uuid')
+    user_uuid = user_dict.get('uuid')
+
+    success, message, session_user_data = get_session_user_data(session_uuid, user_uuid)
+
+    if not success:
+        return {
+            'status': {
+                'success': False,
+                'http_status': 400,
+                'message': message
+            }
+        }
+
     data = user_actions_pb2.UpdateUserPasswordRequest(
-        user_uuid=user_dict.get('uuid'),
-        email=user_dict.get('email'),
+        user_uuid=session_user_data.get('uuid'),
+        email=session_user_data.get('email'),
         current_password=request_data.current_password,
         new_password=request_data.new_password
     )
@@ -165,6 +214,7 @@ async def change_user_details(
         request_data: ChangeDetailsRequest,
         response: Response,
         client: ServerCommunication = Depends(get_grpc_account_client),
+        session: str = Cookie(),
         user: str = Cookie()
     ) -> dict:
 
@@ -172,11 +222,26 @@ async def change_user_details(
 
     '''
 
+    session_dict = json.loads(session)
     user_dict = json.loads(user)
 
+    session_uuid = session_dict.get('session_uuid')
+    user_uuid = user_dict.get('uuid')
+
+    success, message, session_user_data = get_session_user_data(session_uuid, user_uuid)
+
+    if not success:
+        return {
+            'status': {
+                'success': False,
+                'http_status': 400,
+                'message': message
+            }
+        }
+
     data = user_actions_pb2.UpdateUserDetailsRequest(
-        user_uuid=user_dict.get('uuid'),
-        email=user_dict.get('email'),
+        user_uuid=session_user_data.get('uuid'),
+        email=session_user_data.get('email'),
         first_name=request_data.first_name,
         last_name=request_data.last_name,
         gender=request_data.gender,
@@ -208,6 +273,7 @@ async def change_user_details(
 async def delete_user_account(
         response: Response,
         client: ServerCommunication = Depends(get_grpc_account_client),
+        session: str = Cookie(),
         user: str = Cookie()
     ) -> dict:
 
@@ -215,11 +281,26 @@ async def delete_user_account(
 
     '''
 
+    session_dict = json.loads(session)
     user_dict = json.loads(user)
 
+    session_uuid = session_dict.get('session_uuid')
+    user_uuid = user_dict.get('uuid')
+
+    success, message, session_user_data = get_session_user_data(session_uuid, user_uuid)
+
+    if not success:
+        return {
+            'status': {
+                'success': False,
+                'http_status': 400,
+                'message': message
+            }
+        }
+
     data = user_actions_pb2.DeleteAccountRequest(
-        user_uuid=user_dict.get('uuid'),
-        email=user_dict.get('email')
+        user_uuid=session_user_data.get('uuid'),
+        email=session_user_data.get('email')
     )
 
     success, data = client.grpc_request('DeleteAccount', partial(UserSettingsServiceStub), data)
