@@ -41,15 +41,15 @@ def reconfigure_adaptive_restrictions() -> None: # TEMPORARY
     return (None):
     '''
 
-    global BASIC_VERIFY_CONFIG
+    global UPDATE_DATA_VERIFY_CONFIG
 
     today = datetime.today()
 
     min_date = today.replace(year=today.year - 110).strftime("%Y-%m-%d")
     max_date = today.replace(year=today.year - 9).strftime("%Y-%m-%d")
 
-    BASIC_VERIFY_CONFIG['date_of_birth']['restrictions']['date']['min'] = min_date
-    BASIC_VERIFY_CONFIG['date_of_birth']['restrictions']['date']['max'] = max_date
+    UPDATE_DATA_VERIFY_CONFIG['date_of_birth']['restrictions']['date']['min'] = min_date
+    UPDATE_DATA_VERIFY_CONFIG['date_of_birth']['restrictions']['date']['max'] = max_date
 
 
 def initialise_file() -> None:
@@ -318,7 +318,68 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
         print("UpdateUserDetails Request Made:")
         print(request)
 
-        return None
+        return_status = HTTP_Response(
+            success=True,
+            http_status=200,
+            message='Request Successful'
+        )
+
+        data = {
+            'user_uuid': request.user_uuid,
+            'first_name': request.first_name,
+            'last_name': request.last_name,
+            'gender': request.gender,
+            'date_of_birth': request.date_of_birth
+        }
+
+        reconfigure_adaptive_restrictions() # TODO: remove when verification for said dates are restricted adaptively
+
+        success, message, schema = get_verification_schema(UPDATE_EMAIL_VERIFY_CONFIG, data)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = message
+
+            return return_status
+
+        success, errors = DataVerification().verify_data(schema)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 400
+            return_status.message = 'Invalid Data Recieved'
+            return_status.error.extend(errors)
+
+            return return_status
+
+        with get_db_conn() as session:
+            user_result = session.query(User).filter(User.uuid == request.user_uuid).first()
+
+            if user_result is None:
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'Unable To Fetch Account Data'
+
+                return return_status
+            
+            # TODO: Simplify this if statement block
+            if request.first_name != '':
+                user_result.first_name = request.first_name
+
+            if request.last_name != '':
+                user_result.last_name = request.last_name
+
+            if request.gender != '':
+                user_result.gender = request.gender
+
+            if request.date_of_birth != '':
+                user_result.date_of_birth = request.date_of_birth
+
+            session.commit()
+            user = user_proto_format(user_result)
+
+            return BasicAccountDetailsResponse(status=return_status, user=user)
 
 
     def DeleteAccount(cls: Self, request: user_actions_pb2.DeleteAccountRequest, context: grpc.ServicerContext) -> HTTP_Response:

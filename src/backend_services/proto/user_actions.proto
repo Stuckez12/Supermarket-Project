@@ -46,16 +46,14 @@ message UpdateUserPasswordRequest {
 message UpdateUserDetailsRequest {
     // user_uuid
     string user_uuid = 1;
-    // email
-    string email = 2;
     // first_name
-    string first_name = 3;
+    string first_name = 2;
     // last_name
-    string last_name = 4;
+    string last_name = 3;
     // gender
-    string gender = 5;
+    string gender = 4;
     // date_of_birth
-    string date_of_birth = 6;
+    string date_of_birth = 5;
 }
 
 // DeleteAccountRequest

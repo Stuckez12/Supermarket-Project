@@ -97,6 +97,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
         print("UserRegistration Request Made:")
         print(request)
 
+        # TODO: Transfer all verification code to one adaptive function to be used for all RPC calls
         return_status = HTTP_Response(
             success=True,
             http_status=200,
@@ -112,7 +113,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
             'date_of_birth': request.date_of_birth,
         }
 
-        reconfigure_adaptive_restrictions() # TEMP: remove when verification for said dates are restricted adaptively
+        reconfigure_adaptive_restrictions() # TODO: remove when verification for said dates are restricted adaptively
 
         success, message, schema = get_verification_schema(AUTH_VERIFY_CONFIG, data)
 

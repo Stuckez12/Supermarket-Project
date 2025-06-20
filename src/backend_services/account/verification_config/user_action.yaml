@@ -39,10 +39,9 @@ update_password:
 update_data:
   uuid:
     type: str_uuid
-  email:
-    type: email
   first_name:
     type: str
+    skip_empty: True
     restrictions:
         min_len: 2
         max_len: 48
@@ -52,6 +51,7 @@ update_data:
         symbols: 'DEFAULT'
   last_name:
     type: str
+    skip_empty: True
     restrictions:
       min_len: 2
       max_len: 48
@@ -61,6 +61,7 @@ update_data:
       symbols: 'DEFAULT'
   gender:
     type: str
+    skip_empty: True
     restrictions:
       min_len: 4
       max_len: 20
@@ -70,6 +71,7 @@ update_data:
       symbols: 'NONE'
   date_of_birth:
     type: datetime
+    skip_empty: True
     restrictions:
       date:
         min: ADAPTIVE

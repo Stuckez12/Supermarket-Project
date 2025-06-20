@@ -45,20 +45,18 @@ class UpdateUserPasswordRequest(_message.Message):
     def __init__(self, user_uuid: _Optional[str] = ..., email: _Optional[str] = ..., current_password: _Optional[str] = ..., new_password: _Optional[str] = ...) -> None: ...
 
 class UpdateUserDetailsRequest(_message.Message):
-    __slots__ = ("user_uuid", "email", "first_name", "last_name", "gender", "date_of_birth")
+    __slots__ = ("user_uuid", "first_name", "last_name", "gender", "date_of_birth")
     USER_UUID_FIELD_NUMBER: _ClassVar[int]
-    EMAIL_FIELD_NUMBER: _ClassVar[int]
     FIRST_NAME_FIELD_NUMBER: _ClassVar[int]
     LAST_NAME_FIELD_NUMBER: _ClassVar[int]
     GENDER_FIELD_NUMBER: _ClassVar[int]
     DATE_OF_BIRTH_FIELD_NUMBER: _ClassVar[int]
     user_uuid: str
-    email: str
     first_name: str
     last_name: str
     gender: str
     date_of_birth: str
-    def __init__(self, user_uuid: _Optional[str] = ..., email: _Optional[str] = ..., first_name: _Optional[str] = ..., last_name: _Optional[str] = ..., gender: _Optional[str] = ..., date_of_birth: _Optional[str] = ...) -> None: ...
+    def __init__(self, user_uuid: _Optional[str] = ..., first_name: _Optional[str] = ..., last_name: _Optional[str] = ..., gender: _Optional[str] = ..., date_of_birth: _Optional[str] = ...) -> None: ...
 
 class DeleteAccountRequest(_message.Message):
     __slots__ = ("user_uuid", "email")

@@ -208,7 +208,6 @@ async def change_user_password(
 @router.post('/change-details', dependencies=[Depends(is_user_logged_in)])
 async def change_user_details(
         request_data: ChangeDetailsRequest,
-        response: Response,
         client: ServerCommunication = Depends(get_grpc_account_client),
         session: str = Cookie(),
         user: str = Cookie()
@@ -237,7 +236,6 @@ async def change_user_details(
 
     data = user_actions_pb2.UpdateUserDetailsRequest(
         user_uuid=session_user_data.get('uuid'),
-        email=session_user_data.get('email'),
         first_name=request_data.first_name,
         last_name=request_data.last_name,
         gender=request_data.gender,
@@ -256,7 +254,8 @@ async def change_user_details(
             }
         }
 
-    http_status = get_status_response_data(data, embedded=False)
+    http_status = get_status_response_data(data)
+    user = get_user_response_data(data) if data.HasField('user') else None
 
     return { 'status': http_status, 'user': user }
 
