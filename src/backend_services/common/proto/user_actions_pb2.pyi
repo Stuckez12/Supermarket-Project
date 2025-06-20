@@ -21,14 +21,16 @@ class BasicAccountDetailsResponse(_message.Message):
     def __init__(self, status: _Optional[_Union[_input_output_messages_pb2.HTTP_Response, _Mapping]] = ..., user: _Optional[_Union[_user_login_pb2.UserData, _Mapping]] = ...) -> None: ...
 
 class UpdateUserEmailRequest(_message.Message):
-    __slots__ = ("user_uuid", "current_email", "new_email")
+    __slots__ = ("session_uuid", "user_uuid", "current_email", "new_email")
+    SESSION_UUID_FIELD_NUMBER: _ClassVar[int]
     USER_UUID_FIELD_NUMBER: _ClassVar[int]
     CURRENT_EMAIL_FIELD_NUMBER: _ClassVar[int]
     NEW_EMAIL_FIELD_NUMBER: _ClassVar[int]
+    session_uuid: str
     user_uuid: str
     current_email: str
     new_email: str
-    def __init__(self, user_uuid: _Optional[str] = ..., current_email: _Optional[str] = ..., new_email: _Optional[str] = ...) -> None: ...
+    def __init__(self, session_uuid: _Optional[str] = ..., user_uuid: _Optional[str] = ..., current_email: _Optional[str] = ..., new_email: _Optional[str] = ...) -> None: ...
 
 class UpdateUserPasswordRequest(_message.Message):
     __slots__ = ("user_uuid", "email", "current_password", "new_password")

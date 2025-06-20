@@ -4,19 +4,18 @@ This file holds the
 '''
 
 import grpc
-import json
-import os
-import uuid
 
 from datetime import datetime
 from typing import Self
 
+from src.backend_services.account.authentication.login_funcs import send_and_store_otp_code
 from src.backend_services.account.database.database import get_db_conn
 from src.backend_services.account.database.models import User
 
 from src.backend_services.common.proto import user_actions_pb2, user_actions_pb2_grpc
 from src.backend_services.common.proto.user_actions_pb2 import BasicAccountDetailsResponse
 from src.backend_services.common.proto.input_output_messages_pb2 import HTTP_Response, OTP_Response
+from src.backend_services.common.redis.fetch_session_data import update_user_email_session
 from src.backend_services.common.utils.data_verification import DataVerification
 from src.backend_services.common.utils.schema import load_yaml_file_as_dict, get_verification_schema
 from src.backend_services.common.utils.utils import user_proto_format
@@ -160,7 +159,90 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
         print("UpdateUserEmail Request Made:")
         print(request)
 
-        return None
+        return_status = HTTP_Response(
+            success=True,
+            http_status=200,
+            message='Request Successful'
+        )
+
+        data = {
+            'session_uuid': request.session_uuid,
+            'user_uuid': request.user_uuid,
+            'current_email': request.current_email,
+            'new_email': request.new_email
+        }
+
+        success, message, schema = get_verification_schema(UPDATE_EMAIL_VERIFY_CONFIG, data)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = message
+
+            return OTP_Response(status=return_status, otp_required=False)
+
+        success, errors = DataVerification().verify_data(schema)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 400
+            return_status.message = 'Invalid Data Recieved'
+            return_status.error.extend(errors)
+
+            return OTP_Response(status=return_status, otp_required=False)
+        
+        print('verified')
+
+        with get_db_conn() as session:
+            user_result = session.query(User).filter(User.uuid == request.user_uuid, User.email == request.current_email).first()
+
+            if user_result is None:
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'Unable To Fetch Account Data'
+
+                return OTP_Response(status=return_status, otp_required=False)
+            
+            print('found')
+
+            user_result.email = request.new_email
+            user_result.email_verified = False
+            user_result.user_status = 'Unverified'
+
+            print('db values set')
+
+            try:
+
+                success, message = update_user_email_session(request.session_uuid, request.user_uuid, request.new_email, False)
+
+            except Exception as e:
+                print('\n\n\n\n\nERROR\n\n\n\n\n')
+                print(e)
+                return OTP_Response(status=return_status, otp_required=False)
+
+            print('update_user_email_session function ran')
+
+            if not success:
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'Unable To Fetch Account Data'
+
+                return OTP_Response(status=return_status, otp_required=False)
+
+            print('session updated')
+
+            success, return_message = send_and_store_otp_code(request.new_email, return_status)
+
+            if not success:
+                return OTP_Response(status=return_message, otp_required=True)
+
+            print('redis data stored')
+
+            session.commit()
+
+            print('db values committed')
+
+            return OTP_Response(status=return_status, otp_required=True)
 
 
     def UpdateUserPassword(cls: Self, request: user_actions_pb2.UpdateUserPasswordRequest, context: grpc.ServicerContext) -> HTTP_Response:

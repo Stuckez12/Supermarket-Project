@@ -44,7 +44,7 @@ def send_and_store_otp_code(email: str, return_status: HTTP_Response, replace_me
             return_status.message = message
             return_status.error.extend(['Unable To Send Verification Email'])
 
-        return False, user_login_pb2.UserRegistrationResponse(status=return_status)
+        return False, return_status
 
     success, message, redis_client = get_redis_conn()
 
@@ -60,7 +60,7 @@ def send_and_store_otp_code(email: str, return_status: HTTP_Response, replace_me
 
         return_status.error.extend([message])
 
-        return False, user_login_pb2.UserRegistrationResponse(status=return_status)
+        return False, return_status
 
     redis_client.set(
         name=f'verification:otp:{email}',
@@ -120,6 +120,8 @@ def check_email_session_data(email: str, session_uuid: str, return_status: HTTP_
         return False, user_login_pb2.UserRegistrationResponse(status=return_status)
 
     user_session_data = json.loads(user_data)
+
+    print(user_session_data)
 
     if user_session_data['email'] != email:
         return_status.success = False

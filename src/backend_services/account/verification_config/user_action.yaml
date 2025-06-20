@@ -3,7 +3,9 @@ basic_data:
     type: str_uuid
 
 update_email:
-  uuid:
+  session_uuid:
+    type: str_uuid
+  user_uuid:
     type: str_uuid
   current_email:
     type: email

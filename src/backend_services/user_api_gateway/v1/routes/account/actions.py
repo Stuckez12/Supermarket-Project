@@ -102,7 +102,6 @@ async def fetch_user_data(
 @router.post('/change-email', dependencies=[Depends(is_user_logged_in)])
 async def change_user_email(
         request_data: ChangeEmailRequest,
-        response: Response,
         client: ServerCommunication = Depends(get_grpc_account_client),
         session: str = Cookie(),
         user: str = Cookie()
@@ -130,6 +129,7 @@ async def change_user_email(
         }
 
     data = user_actions_pb2.UpdateUserEmailRequest(
+        session_uuid=session_uuid,
         user_uuid=session_user_data.get('uuid'),
         current_email=session_user_data.get('email'),
         new_email=request_data.new_email
@@ -148,12 +148,8 @@ async def change_user_email(
         }
 
     http_status = get_status_response_data(data)
-    user = get_user_response_data(data) if data.HasField('user') else None
 
-    if user is not None:
-        response.set_cookie(key="user", value=json.dumps(user), httponly=True)
-
-    return { 'status': http_status, 'user': user }
+    return { 'status': http_status, 'otp_required': data.otp_required }
 
 
 @router.post('/change-password', dependencies=[Depends(is_user_logged_in)])

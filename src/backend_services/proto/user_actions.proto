@@ -20,12 +20,14 @@ message BasicAccountDetailsResponse {
 
 // UpdateUserEmailRequest
 message UpdateUserEmailRequest {
+    // session_uuid
+    string session_uuid = 1;
     // user_uuid
-    string user_uuid = 1;
+    string user_uuid = 2;
     // current_email
-    string current_email = 2;
+    string current_email = 3;
     // new_email
-    string new_email = 3;
+    string new_email = 4;
 }
 
 // UpdateUserPasswordRequest

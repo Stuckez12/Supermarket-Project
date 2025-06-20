@@ -48,7 +48,7 @@ def create_session(user_uuid: str, user_data: User) -> Tuple[str, int]:
     return session_uuid, unix_time
 
 
-def update_session(session_uuid: str, user_uuid: str, user_data: User):
+def update_session(session_uuid: str, user_uuid: str, user_data: User) -> Tuple[str, int]:
     '''
     Updates the two existing session instances with an hour time limit.
     An instance each for the user data and whether the user has been verified.

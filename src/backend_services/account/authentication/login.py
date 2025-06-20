@@ -170,7 +170,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
         success, return_message = send_and_store_otp_code(request.email, return_status)
 
         if not success:
-            return return_message
+            return user_login_pb2.UserLoginResponse(status=return_message)
 
         return user_login_pb2.UserRegistrationResponse(status=return_status)
 
@@ -282,7 +282,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
                 success, return_message = send_and_store_otp_code(request.email, return_status)
 
                 if not success:
-                    return return_message
+                    return user_login_pb2.UserLoginResponse(status=return_message)
 
             user = user_proto_format(user_result)
 
@@ -374,7 +374,7 @@ class UserAuthentication_Service(user_login_pb2_grpc.UserAuthService):
                     success, return_message = send_and_store_otp_code(request.email, return_status, replace_message=False)
 
                     if not success:
-                        return return_message
+                        return user_login_pb2.UserLoginResponse(status=return_message)
                     
                 return user_login_pb2.UserLoginResponse(status=return_status)
 
