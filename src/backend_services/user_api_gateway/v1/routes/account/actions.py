@@ -200,7 +200,7 @@ async def change_user_password(
             }
         }
 
-    http_status = get_status_response_data(data)
+    http_status = get_status_response_data(data, embedded=False)
 
     return { 'status': http_status }
 
@@ -256,11 +256,7 @@ async def change_user_details(
             }
         }
 
-    http_status = get_status_response_data(data)
-    user = get_user_response_data(data) if data.HasField('user') else None
-
-    if user is not None:
-        response.set_cookie(key="user", value=json.dumps(user), httponly=True)
+    http_status = get_status_response_data(data, embedded=False)
 
     return { 'status': http_status, 'user': user }
 
@@ -311,7 +307,7 @@ async def delete_user_account(
             }
         }
 
-    http_status = get_status_response_data(data)
+    http_status = get_status_response_data(data, embedded=False)
     
     response.delete_cookie(key="user")
     response.delete_cookie(key="session")

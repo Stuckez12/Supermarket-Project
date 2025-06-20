@@ -17,7 +17,7 @@ from src.backend_services.common.redis.redis import get_redis_conn
 
 
 # environment variables
-ATTEMPTS_BEFORE_LOCK = os.environ.get('ACCOUNT_MAX_LOGIN_ATTEMPTS')
+ATTEMPTS_BEFORE_LOCK = int(os.environ.get('ACCOUNT_MAX_LOGIN_ATTEMPTS'))
 
 
 def send_and_store_otp_code(email: str, return_status: HTTP_Response, replace_message: bool=True):

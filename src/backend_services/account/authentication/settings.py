@@ -7,6 +7,7 @@ import grpc
 
 from datetime import datetime
 from typing import Self
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.backend_services.account.authentication.login_funcs import send_and_store_otp_code
 from src.backend_services.account.database.database import get_db_conn
@@ -190,8 +191,6 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
             return_status.error.extend(errors)
 
             return OTP_Response(status=return_status, otp_required=False)
-        
-        print('verified')
 
         with get_db_conn() as session:
             user_result = session.query(User).filter(User.uuid == request.user_uuid, User.email == request.current_email).first()
@@ -202,25 +201,12 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
                 return_status.message = 'Unable To Fetch Account Data'
 
                 return OTP_Response(status=return_status, otp_required=False)
-            
-            print('found')
 
             user_result.email = request.new_email
             user_result.email_verified = False
             user_result.user_status = 'Unverified'
 
-            print('db values set')
-
-            try:
-
-                success, message = update_user_email_session(request.session_uuid, request.user_uuid, request.new_email, False)
-
-            except Exception as e:
-                print('\n\n\n\n\nERROR\n\n\n\n\n')
-                print(e)
-                return OTP_Response(status=return_status, otp_required=False)
-
-            print('update_user_email_session function ran')
+            success, message = update_user_email_session(request.session_uuid, request.user_uuid, request.new_email, False)
 
             if not success:
                 return_status.success = False
@@ -229,18 +215,12 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
 
                 return OTP_Response(status=return_status, otp_required=False)
 
-            print('session updated')
-
             success, return_message = send_and_store_otp_code(request.new_email, return_status)
 
             if not success:
                 return OTP_Response(status=return_message, otp_required=True)
 
-            print('redis data stored')
-
             session.commit()
-
-            print('db values committed')
 
             return OTP_Response(status=return_status, otp_required=True)
 
@@ -260,7 +240,67 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
         print("UpdateUserPassword Request Made:")
         print(request)
 
-        return None
+        return_status = HTTP_Response(
+            success=True,
+            http_status=200,
+            message='Request Successful'
+        )
+
+        data = {
+            'user_uuid': request.user_uuid,
+            'email': request.email,
+            'current_password': request.current_password,
+            'new_password': request.new_password
+        }
+
+        success, message, schema = get_verification_schema(UPDATE_EMAIL_VERIFY_CONFIG, data)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = message
+
+            return return_status
+
+        success, errors = DataVerification().verify_data(schema)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 400
+            return_status.message = 'Invalid Data Recieved'
+            return_status.error.extend(errors)
+
+            return return_status
+
+        with get_db_conn() as session:
+            user_result = session.query(User).filter(User.uuid == request.user_uuid, User.email == request.email).first()
+
+            if user_result is None:
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'Unable To Fetch Account Data'
+
+                return return_status
+
+            if not check_password_hash(user_result.password, request.current_password):
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'Incorrect Password Provided'
+
+                return return_status
+
+            if request.current_password == request.new_password:
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'New Password Cannot Be The Same As The Current Password'
+
+                return return_status
+
+            user_result.password = generate_password_hash(request.new_password)
+
+            session.commit()
+
+            return return_status
 
 
     def UpdateUserDetails(cls: Self, request: user_actions_pb2.UpdateUserDetailsRequest, context: grpc.ServicerContext) -> BasicAccountDetailsResponse:
