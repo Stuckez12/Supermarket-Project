@@ -29,12 +29,6 @@ To Be Added
 
 ## Development Plans
 
-- Account Settings (within account-service)
-- - Edit Account Data
-- - View Account Data
-- - Delete Account Data
-
-
 - Account Management (within account-service)
 - - Update roles and status
 - - All Account Visualisation (admin-service)
