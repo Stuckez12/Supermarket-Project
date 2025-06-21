@@ -1,5 +1,6 @@
 '''
-
+Contains the gateway routes to the account-service
+in relation to account modifications.
 '''
 
 import json
@@ -57,7 +58,13 @@ async def fetch_user_data(
     ) -> dict:
 
     '''
+    Fetches the users data from the account-service and returns it as a dictionary.
 
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+    session (str): the session object containing the session_uuid and expiry time [default - No Cookie]
+    user (str): the user object containing the users public data [default - No Cookie]
+
+    return (dict): returns a dict containing the response data
     '''
 
     session_dict = json.loads(session)
@@ -108,7 +115,17 @@ async def change_user_email(
     ) -> dict:
 
     '''
+    Changes the users email to the new provided email.
+    When this change occurs, the user is required to
+    verify their email/account before being able to
+    use their account.
 
+    request_data (ChangeEmailRequest): class containing all the expected inputs from the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+    session (str): the session object containing the session_uuid and expiry time [default - No Cookie]
+    user (str): the user object containing the users public data [default - No Cookie]
+
+    return (dict): returns a dict containing the response data
     '''
 
     session_dict = json.loads(session)
@@ -161,7 +178,16 @@ async def change_user_password(
     ) -> dict:
 
     '''
+    Changes the users password to the new provided password.
+    The user must type their current password before they
+    can change their password.
 
+    request_data (ChangePasswordRequest): class containing all the expected inputs from the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+    session (str): the session object containing the session_uuid and expiry time [default - No Cookie]
+    user (str): the user object containing the users public data [default - No Cookie]
+
+    return (dict): returns a dict containing the response data
     '''
 
     session_dict = json.loads(session)
@@ -214,7 +240,18 @@ async def change_user_details(
     ) -> dict:
 
     '''
+    Changes the select few details about the user. If the
+    data is to not be changed, then a blank string must be
+    provided. If unable to provide nothing, send the current
+    data that is saved already in the database.
 
+    request_data (ChangeDetailsRequest): class containing all the expected inputs from the client
+    response (Response): the response object FastAPI send to the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+    session (str): the session object containing the session_uuid and expiry time [default - No Cookie]
+    user (str): the user object containing the users public data [default - No Cookie]
+
+    return (dict): returns a dict containing the response data
     '''
 
     session_dict = json.loads(session)
@@ -269,7 +306,18 @@ async def delete_user_account(
     ) -> dict:
 
     '''
+    Deletes the account that the user is currently logged in as.
+    The user data is deleted but the account remains with no
+    identifying data related to the user. This is done to preserve
+    all the necessary actions that can be used for various data
+    analysis methods.
 
+    response (Response): the response object FastAPI send to the client
+    client (ServerCommunication): the class object used to communicate to the specific server [default - account-service object]
+    session (str): the session object containing the session_uuid and expiry time [default - No Cookie]
+    user (str): the user object containing the users public data [default - No Cookie]
+
+    return (dict): returns a dict containing the response data
     '''
 
     session_dict = json.loads(session)

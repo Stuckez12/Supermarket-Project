@@ -2,7 +2,7 @@
 ## Overview
 
 After finishing university, I wanted to test my skills to their absolute limit.
-Before I was working on assignments that were scaled down and (at the time) complex, learning new technologies and methods that I was taught for the last three years. 
+Before, I was working on assignments that were scaled down and (at the time) complex, learning new technologies and methods that I was taught for the last three years. 
 Now that I have finished, I wanted to apply this newly obtained knowledge and further expand on it by creating a more advanced and complex project.
 I chose a supermarket application as at first it sounds simple but can become very complex depending on how much you want to implement and develop.
 

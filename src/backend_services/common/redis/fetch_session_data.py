@@ -1,6 +1,6 @@
 '''
-This file handles the creation and management
-of redis sessions that the frontend clients.
+This file handles the fetching and modification
+of session data stored within redis.
 '''
 
 import json
@@ -12,7 +12,7 @@ from src.backend_services.common.redis.redis import get_redis_conn
 
 def get_session_user_data(session_uuid: str, user_uuid: str) -> Tuple[bool, str, Union[dict, None]]:
     '''
-    Fetches the user data stored on a 
+    Fetches the user data stored withion an active session.
 
     user_uuid (str): the users uuid
     user_data (User): an sqlalchemy object containing one row for the specified users data
@@ -38,7 +38,8 @@ def get_session_user_data(session_uuid: str, user_uuid: str) -> Tuple[bool, str,
 
 def update_user_email_session(session_uuid: str, user_uuid: str, new_email: str, verified: bool=True) -> Tuple[bool, str]:
     '''
-    Text Here
+    Updates the email storeed on the redis session
+    ensuring data is kept up to date, even when temporary.
 
     session_uuid (str): the clients session uuid identifier
     user_uuid (str): the users uuid

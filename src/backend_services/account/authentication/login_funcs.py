@@ -1,5 +1,6 @@
 '''
-
+Contains all the supporting functions that are used to
+manage and control the users actions for authentication.
 '''
 
 import json

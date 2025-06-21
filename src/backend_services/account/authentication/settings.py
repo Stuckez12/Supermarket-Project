@@ -1,6 +1,8 @@
 '''
-This file holds the 
- on the gRPC account-service
+This file holds all of the actions that account
+users can perform on the gRPC account-service.
+These actions will be seen in the settings tab
+for the frontend.
 '''
 
 import grpc
@@ -308,7 +310,7 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
 
     def UpdateUserDetails(cls: Self, request: user_actions_pb2.UpdateUserDetailsRequest, context: grpc.ServicerContext) -> BasicAccountDetailsResponse:
         '''
-        This gRPC function recieves a user uuid from the request.
+        This gRPC function recieves a user uuid and the specified data they want to modify from the request.
         The data recieved is validated and data related to the user and return the users' data.
         If any errors arise then relevant error messages are returned.
 
@@ -389,7 +391,7 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
 
     def DeleteAccount(cls: Self, request: user_actions_pb2.DeleteAccountRequest, context: grpc.ServicerContext) -> HTTP_Response:
         '''
-        This gRPC function recieves a user uuid and email from the request.
+        This gRPC function recieves a user uuid from the request.
         The data recieved is validated and deletes the users' data from the database.
         If any errors arise then relevant error messages are returned.
 
@@ -428,8 +430,6 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
             return_status.error.extend(errors)
 
             return return_status
-        
-        print('verified')
 
         with get_db_conn() as session:
             user_result = session.query(User).filter(User.uuid == request.user_uuid).first()
@@ -440,8 +440,6 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
                 return_status.message = 'Unable To Fetch Account Data'
 
                 return return_status
-            
-            print('1')
             
             user_result.email = ''
             user_result.password = ''
@@ -454,14 +452,6 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
             user_result.user_status = 'Closed'
             user_result.last_activity_at = datetime.now(timezone.utc).timestamp()
 
-            print('2')
-
-            try:
-
-                session.commit()
-
-            except Exception as e:
-                print(e)
-                return None
+            session.commit()
 
             return return_status

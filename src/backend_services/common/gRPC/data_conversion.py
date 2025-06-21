@@ -1,5 +1,6 @@
 '''
-
+Contains functions used to extract the data from proto
+response messages and converts them into dictionaries.
 '''
 
 from google.protobuf.message import Message

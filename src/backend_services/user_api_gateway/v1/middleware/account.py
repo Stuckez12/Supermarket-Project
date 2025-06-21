@@ -1,5 +1,6 @@
 '''
-
+Contains the middleware functions used to check and validate
+user sessions/data before executing the requested action.
 '''
 
 import json
