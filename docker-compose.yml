@@ -53,6 +53,7 @@ services:
       - pg-network
       - redis-network
       - grpc-network
+      - gateway-network
     depends_on:
       - redis
       - account-service
@@ -76,11 +77,27 @@ services:
     env_file: .env
     attach: false
 
+  customer_web_frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/customer_website/Dockerfile
+    container_name: customer_web_frontend
+    ports:
+      - ${CW_WEB_PORT}:${CW_WEB_PORT}
+    networks:
+      - gateway-network
+    depends_on:
+      - customer_web_api_gateway
+    env_file: .env
+    stdin_open: true
+    tty: true
+
 networks:
   pg-network:
   redis-network:
   grpc-network:
     driver: bridge
+  gateway-network:
 
 volumes:
   postgres_data:
