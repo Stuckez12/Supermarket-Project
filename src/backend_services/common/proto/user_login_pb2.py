@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 import input_output_messages_pb2 as input__output__messages__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10user_login.proto\x12\nuser_login\x1a\x1binput_output_messages.proto\"\x88\x01\n\x17UserRegistrationRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x11\n\tlast_name\x18\x04 \x01(\t\x12\x0e\n\x06gender\x18\x05 \x01(\t\x12\x15\n\rdate_of_birth\x18\x06 \x01(\t\"\x93\x02\n\x08UserData\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12 \n\x18password_last_changed_at\x18\x03 \x01(\x03\x12\x12\n\nfirst_name\x18\x04 \x01(\t\x12\x11\n\tlast_name\x18\x05 \x01(\t\x12\x0e\n\x06gender\x18\x06 \x01(\t\x12\x15\n\rdate_of_birth\x18\x07 \x01(\t\x12\x12\n\ncreated_at\x18\x08 \x01(\x03\x12\x12\n\nupdated_at\x18\t \x01(\x03\x12\x12\n\nlast_login\x18\n \x01(\x03\x12\x16\n\x0e\x65mail_verified\x18\x0b \x01(\x08\x12\x13\n\x0buser_status\x18\x0c \x01(\t\x12\x11\n\tuser_role\x18\r \x01(\t\"e\n\x18UserRegistrationResponse\x12%\n\x06status\x18\x01 \x01(\x0b\x32\x15.common.HTTP_Response\x12\"\n\x04user\x18\x02 \x01(\x0b\x32\x14.user_login.UserData\"3\n\x10UserLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\x9e\x01\n\x11UserLoginResponse\x12%\n\x06status\x18\x01 \x01(\x0b\x32\x15.common.HTTP_Response\x12\"\n\x04user\x18\x02 \x01(\x0b\x32\x14.user_login.UserData\x12(\n\x07session\x18\x03 \x01(\x0b\x32\x17.user_login.UserSession\x12\x14\n\x0cotp_required\x18\x04 \x01(\x08\"<\n\x11UserLogoutRequest\x12\x14\n\x0csession_uuid\x18\x01 \x01(\t\x12\x11\n\tuser_uuid\x18\x02 \x01(\t\"Z\n\nOTPRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08otp_code\x18\x02 \x01(\t\x12\x14\n\x0csession_uuid\x18\x03 \x01(\t\x12\x15\n\rreturn_action\x18\x04 \x01(\t\"8\n\x0bUserSession\x12\x14\n\x0csession_uuid\x18\x01 \x01(\t\x12\x13\n\x0b\x65xpiry_time\x18\x02 \x01(\x03\x32\xd0\x02\n\x0fUserAuthService\x12_\n\x10UserRegistration\x12#.user_login.UserRegistrationRequest\x1a$.user_login.UserRegistrationResponse\"\x00\x12J\n\tUserLogin\x12\x1c.user_login.UserLoginRequest\x1a\x1d.user_login.UserLoginResponse\"\x00\x12J\n\x0fOTPVerification\x12\x16.user_login.OTPRequest\x1a\x1d.user_login.UserLoginResponse\"\x00\x12\x44\n\nUserLogout\x12\x1d.user_login.UserLogoutRequest\x1a\x15.common.HTTP_Response\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10user_login.proto\x12\nuser_login\x1a\x1binput_output_messages.proto\"\x88\x01\n\x17UserRegistrationRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x11\n\tlast_name\x18\x04 \x01(\t\x12\x0e\n\x06gender\x18\x05 \x01(\t\x12\x15\n\rdate_of_birth\x18\x06 \x01(\t\"\x93\x02\n\x08UserData\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12 \n\x18password_last_changed_at\x18\x03 \x01(\x03\x12\x12\n\nfirst_name\x18\x04 \x01(\t\x12\x11\n\tlast_name\x18\x05 \x01(\t\x12\x0e\n\x06gender\x18\x06 \x01(\t\x12\x15\n\rdate_of_birth\x18\x07 \x01(\t\x12\x12\n\ncreated_at\x18\x08 \x01(\x03\x12\x12\n\nupdated_at\x18\t \x01(\x03\x12\x12\n\nlast_login\x18\n \x01(\x03\x12\x16\n\x0e\x65mail_verified\x18\x0b \x01(\x08\x12\x13\n\x0buser_status\x18\x0c \x01(\t\x12\x11\n\tuser_role\x18\r \x01(\t\"k\n\x18UserRegistrationResponse\x12+\n\x06status\x18\x01 \x01(\x0b\x32\x1b.input_output.HTTP_Response\x12\"\n\x04user\x18\x02 \x01(\x0b\x32\x14.user_login.UserData\"3\n\x10UserLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\xa4\x01\n\x11UserLoginResponse\x12+\n\x06status\x18\x01 \x01(\x0b\x32\x1b.input_output.HTTP_Response\x12\"\n\x04user\x18\x02 \x01(\x0b\x32\x14.user_login.UserData\x12(\n\x07session\x18\x03 \x01(\x0b\x32\x17.user_login.UserSession\x12\x14\n\x0cotp_required\x18\x04 \x01(\x08\"<\n\x11UserLogoutRequest\x12\x14\n\x0csession_uuid\x18\x01 \x01(\t\x12\x11\n\tuser_uuid\x18\x02 \x01(\t\"Z\n\nOTPRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08otp_code\x18\x02 \x01(\t\x12\x14\n\x0csession_uuid\x18\x03 \x01(\t\x12\x15\n\rreturn_action\x18\x04 \x01(\t\"8\n\x0bUserSession\x12\x14\n\x0csession_uuid\x18\x01 \x01(\t\x12\x13\n\x0b\x65xpiry_time\x18\x02 \x01(\x03\x32\xd6\x02\n\x0fUserAuthService\x12_\n\x10UserRegistration\x12#.user_login.UserRegistrationRequest\x1a$.user_login.UserRegistrationResponse\"\x00\x12J\n\tUserLogin\x12\x1c.user_login.UserLoginRequest\x1a\x1d.user_login.UserLoginResponse\"\x00\x12J\n\x0fOTPVerification\x12\x16.user_login.OTPRequest\x1a\x1d.user_login.UserLoginResponse\"\x00\x12J\n\nUserLogout\x12\x1d.user_login.UserLogoutRequest\x1a\x1b.input_output.HTTP_Response\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,17 +37,17 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_USERDATA']._serialized_start=201
   _globals['_USERDATA']._serialized_end=476
   _globals['_USERREGISTRATIONRESPONSE']._serialized_start=478
-  _globals['_USERREGISTRATIONRESPONSE']._serialized_end=579
-  _globals['_USERLOGINREQUEST']._serialized_start=581
-  _globals['_USERLOGINREQUEST']._serialized_end=632
-  _globals['_USERLOGINRESPONSE']._serialized_start=635
-  _globals['_USERLOGINRESPONSE']._serialized_end=793
-  _globals['_USERLOGOUTREQUEST']._serialized_start=795
-  _globals['_USERLOGOUTREQUEST']._serialized_end=855
-  _globals['_OTPREQUEST']._serialized_start=857
-  _globals['_OTPREQUEST']._serialized_end=947
-  _globals['_USERSESSION']._serialized_start=949
-  _globals['_USERSESSION']._serialized_end=1005
-  _globals['_USERAUTHSERVICE']._serialized_start=1008
-  _globals['_USERAUTHSERVICE']._serialized_end=1344
+  _globals['_USERREGISTRATIONRESPONSE']._serialized_end=585
+  _globals['_USERLOGINREQUEST']._serialized_start=587
+  _globals['_USERLOGINREQUEST']._serialized_end=638
+  _globals['_USERLOGINRESPONSE']._serialized_start=641
+  _globals['_USERLOGINRESPONSE']._serialized_end=805
+  _globals['_USERLOGOUTREQUEST']._serialized_start=807
+  _globals['_USERLOGOUTREQUEST']._serialized_end=867
+  _globals['_OTPREQUEST']._serialized_start=869
+  _globals['_OTPREQUEST']._serialized_end=959
+  _globals['_USERSESSION']._serialized_start=961
+  _globals['_USERSESSION']._serialized_end=1017
+  _globals['_USERAUTHSERVICE']._serialized_start=1020
+  _globals['_USERAUTHSERVICE']._serialized_end=1362
 # @@protoc_insertion_point(module_scope)

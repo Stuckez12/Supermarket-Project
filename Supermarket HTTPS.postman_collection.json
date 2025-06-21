@@ -1,0 +1,307 @@
+{
+	"info": {
+		"_postman_id": "bc77e667-4fba-4f0d-a101-39d08ecc7a89",
+		"name": "Supermarket HTTPS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34455508"
+	},
+	"item": [
+		{
+			"name": "Customer Website",
+			"item": [
+				{
+					"name": "v1",
+					"item": [
+						{
+							"name": "Account",
+							"item": [
+								{
+									"name": "Settings",
+									"item": [
+										{
+											"name": "Fetch Account Data",
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "https://localhost:50050/api/v1/account/settings/fetch-data",
+													"protocol": "https",
+													"host": [
+														"localhost"
+													],
+													"port": "50050",
+													"path": [
+														"api",
+														"v1",
+														"account",
+														"settings",
+														"fetch-data"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Change Email",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"new_email\": \"email@email.com\"\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "https://localhost:50050/api/v1/account/settings/change-email",
+													"protocol": "https",
+													"host": [
+														"localhost"
+													],
+													"port": "50050",
+													"path": [
+														"api",
+														"v1",
+														"account",
+														"settings",
+														"change-email"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Change Password",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"current_password\": \"Password1.\",\r\n    \"new_password\": \"Password2.\"\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "https://localhost:50050/api/v1/account/settings/change-password",
+													"protocol": "https",
+													"host": [
+														"localhost"
+													],
+													"port": "50050",
+													"path": [
+														"api",
+														"v1",
+														"account",
+														"settings",
+														"change-password"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Change Details",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"first_name\": \"\", // Must be \"\" for no input\r\n    \"last_name\": \"\", // Must be \"\" for no input\r\n    \"date_of_birth\": \"\", // Must be \"\" for no input\r\n    \"gender\": \"\" // Must be \"\" for no input\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "https://localhost:50050/api/v1/account/settings/change-details",
+													"protocol": "https",
+													"host": [
+														"localhost"
+													],
+													"port": "50050",
+													"path": [
+														"api",
+														"v1",
+														"account",
+														"settings",
+														"change-details"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Delete Account",
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "https://localhost:50050/api/v1/account/settings/delete-account",
+													"protocol": "https",
+													"host": [
+														"localhost"
+													],
+													"port": "50050",
+													"path": [
+														"api",
+														"v1",
+														"account",
+														"settings",
+														"delete-account"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "User Register",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"email\": \"email@email.com\",\r\n    \"password\": \"Password1.\",\r\n    \"first_name\": \"Name\",\r\n    \"last_name\": \"Surname\",\r\n    \"date_of_birth\": \"2000-01-01\",\r\n    \"gender\": \"Male\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://localhost:50050/api/v1/account/register",
+											"protocol": "https",
+											"host": [
+												"localhost"
+											],
+											"port": "50050",
+											"path": [
+												"api",
+												"v1",
+												"account",
+												"register"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "User Login",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"email\": \"email@email.com\",\r\n    \"password\": \"Password1.\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://localhost:50050/api/v1/account/login",
+											"protocol": "https",
+											"host": [
+												"localhost"
+											],
+											"port": "50050",
+											"path": [
+												"api",
+												"v1",
+												"account",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "OTP Verification",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"email\": \"email@email.com\",\r\n    \"otp_code\": \"000000\",\r\n    \"return_action\": \"LOGIN\" // Either LOGIN or REGISTER\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://localhost:50050/api/v1/account/verification/otp/email",
+											"protocol": "https",
+											"host": [
+												"localhost"
+											],
+											"port": "50050",
+											"path": [
+												"api",
+												"v1",
+												"account",
+												"verification",
+												"otp",
+												"email"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Logout",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://localhost:50050/api/v1/account/logout",
+											"protocol": "https",
+											"host": [
+												"localhost"
+											],
+											"port": "50050",
+											"path": [
+												"api",
+												"v1",
+												"account",
+												"logout"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

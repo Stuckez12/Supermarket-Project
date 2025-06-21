@@ -11,14 +11,17 @@ from src.backend_services.common.gRPC.connection_objects import account_client
 
 from src.backend_services.user_api_gateway.v1.routes.account.authentication import router as account_router
 
-app = FastAPI(redirect_slashes=False)
 
+PREFIX = '/api/v1'
+
+
+app = FastAPI(redirect_slashes=False)
 
 app.state.account_grpc_client = account_client
 
 
 # All routers for the gateway server
-app.include_router(account_router, prefix='/api/v1/account')
+app.include_router(account_router, prefix=PREFIX)
 
 
 if __name__ == "__main__":

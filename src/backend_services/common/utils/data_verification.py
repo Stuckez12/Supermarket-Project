@@ -296,13 +296,19 @@ class DataVerification():
             if 'optional' in data_points:
                 if data_points['optional']:
                     optional = True
+
+            if 'skip_empty' in data_points:
+                if data_points['skip_empty']:
+                    if data == '':
+                        continue
  
             if 'restrictions' in data_points:
                 restrictions = data_points['restrictions']
 
+            # TODO: Rework to be a dictionary, making it more maintainable
             if data_points['type'] == str:
                 success, errors = cls.verify_string_data(variable, data, restrictions)
-            
+
             elif data_points['type'] in [int, float]:
                 restrictions['type'] = data_points['type']
                 success, errors = cls.verify_number_data(variable, data, restrictions)

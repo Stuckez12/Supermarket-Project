@@ -9,7 +9,8 @@ from concurrent import futures
 
 from src.backend_services.account.database.database import database_initialization, Base, engine
 from src.backend_services.account.authentication.login import UserAuthentication_Service
-from src.backend_services.common.proto import user_login_pb2_grpc
+from src.backend_services.account.authentication.settings import UserAction_Service
+from src.backend_services.common.proto import user_login_pb2_grpc, user_actions_pb2_grpc
 
 
 def add_services(server: grpc.Server) -> None:
@@ -23,6 +24,9 @@ def add_services(server: grpc.Server) -> None:
 
     user_login_pb2_grpc.add_UserAuthServiceServicer_to_server(UserAuthentication_Service(), server)
     print('Service Added: User-Authentication')
+
+    user_actions_pb2_grpc.add_UserSettingsServiceServicer_to_server(UserAction_Service(), server)
+    print('Service Added: User-Action')
 
 
 def serve() -> None:

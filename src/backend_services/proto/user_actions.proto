@@ -1,0 +1,77 @@
+syntax = "proto3";
+package user_settings;
+
+import "input_output_messages.proto";
+import "user_login.proto";
+
+// GetBasicAccountDetailsRequest
+message GetBasicAccountDetailsRequest {
+    // user_uuid
+    string user_uuid = 1;
+}
+
+// BasicAccountDetailsResponse
+message BasicAccountDetailsResponse {
+    // status
+    input_output.HTTP_Response status = 1;
+    // user
+    user_login.UserData user = 2;
+}
+
+// UpdateUserEmailRequest
+message UpdateUserEmailRequest {
+    // session_uuid
+    string session_uuid = 1;
+    // user_uuid
+    string user_uuid = 2;
+    // current_email
+    string current_email = 3;
+    // new_email
+    string new_email = 4;
+}
+
+// UpdateUserPasswordRequest
+message UpdateUserPasswordRequest {
+    // user_uuid
+    string user_uuid = 1;
+    // email
+    string email = 2;
+    // current_password
+    string current_password = 3;
+    // new_password
+    string new_password = 4;
+}
+
+// UpdateUserDetailsRequest
+message UpdateUserDetailsRequest {
+    // user_uuid
+    string user_uuid = 1;
+    // first_name
+    string first_name = 2;
+    // last_name
+    string last_name = 3;
+    // gender
+    string gender = 4;
+    // date_of_birth
+    string date_of_birth = 5;
+}
+
+// DeleteAccountRequest
+message DeleteAccountRequest {
+    // user_uuid
+    string user_uuid = 1;
+}
+
+// UserSettingsService
+service UserSettingsService {
+    // GetBasicAccountData
+    rpc GetBasicAccountData(GetBasicAccountDetailsRequest) returns (BasicAccountDetailsResponse) {}
+    // UpdateUserEmail
+    rpc UpdateUserEmail(UpdateUserEmailRequest) returns (input_output.OTP_Response) {}
+    // UpdateUserPassword
+    rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (input_output.HTTP_Response) {}
+    // UpdateUserDetails
+    rpc UpdateUserDetails(UpdateUserDetailsRequest) returns (BasicAccountDetailsResponse) {}
+    // DeleteAccount
+    rpc DeleteAccount(DeleteAccountRequest) returns (input_output.HTTP_Response) {}
+}

@@ -27,7 +27,8 @@ if _version_not_supported:
 
 
 class UserAuthServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """UserAuthService
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -58,7 +59,8 @@ class UserAuthServiceStub(object):
 
 
 class UserAuthServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """UserAuthService
+    """
 
     def UserRegistration(self, request, context):
         """UserRegistration
@@ -120,7 +122,8 @@ def add_UserAuthServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class UserAuthService(object):
-    """Missing associated documentation comment in .proto file."""
+    """UserAuthService
+    """
 
     @staticmethod
     def UserRegistration(request,
