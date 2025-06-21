@@ -59,9 +59,7 @@ class UpdateUserDetailsRequest(_message.Message):
     def __init__(self, user_uuid: _Optional[str] = ..., first_name: _Optional[str] = ..., last_name: _Optional[str] = ..., gender: _Optional[str] = ..., date_of_birth: _Optional[str] = ...) -> None: ...
 
 class DeleteAccountRequest(_message.Message):
-    __slots__ = ("user_uuid", "email")
+    __slots__ = ("user_uuid",)
     USER_UUID_FIELD_NUMBER: _ClassVar[int]
-    EMAIL_FIELD_NUMBER: _ClassVar[int]
     user_uuid: str
-    email: str
-    def __init__(self, user_uuid: _Optional[str] = ..., email: _Optional[str] = ...) -> None: ...
+    def __init__(self, user_uuid: _Optional[str] = ...) -> None: ...

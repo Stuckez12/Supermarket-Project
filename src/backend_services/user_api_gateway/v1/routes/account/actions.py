@@ -290,8 +290,7 @@ async def delete_user_account(
         }
 
     data = user_actions_pb2.DeleteAccountRequest(
-        user_uuid=session_user_data.get('uuid'),
-        email=session_user_data.get('email')
+        user_uuid=session_user_data.get('uuid')
     )
 
     success, data = client.grpc_request('DeleteAccount', partial(UserSettingsServiceStub), data)

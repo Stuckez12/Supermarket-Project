@@ -5,7 +5,7 @@ This file holds the
 
 import grpc
 
-from datetime import datetime
+from datetime import datetime, timezone, UTC
 from typing import Self
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -220,6 +220,8 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
             if not success:
                 return OTP_Response(status=return_message, otp_required=True)
 
+            user_result.last_activity_at = datetime.now(timezone.utc).timestamp()
+
             session.commit()
 
             return OTP_Response(status=return_status, otp_required=True)
@@ -297,6 +299,7 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
                 return return_status
 
             user_result.password = generate_password_hash(request.new_password)
+            user_result.last_activity_at = datetime.now(timezone.utc).timestamp()
 
             session.commit()
 
@@ -376,6 +379,8 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
             if request.date_of_birth != '':
                 user_result.date_of_birth = request.date_of_birth
 
+            user_result.last_activity_at = datetime.now(timezone.utc).timestamp()
+
             session.commit()
             user = user_proto_format(user_result)
 
@@ -397,4 +402,66 @@ class UserAction_Service(user_actions_pb2_grpc.UserSettingsService):
         print("DeleteAccount Request Made:")
         print(request)
 
-        return None
+        return_status = HTTP_Response(
+            success=True,
+            http_status=200,
+            message='Request Successful'
+        )
+
+        data = { 'uuid': request.user_uuid }
+
+        success, message, schema = get_verification_schema(DELETION_VERIFY_CONFIG, data)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 500
+            return_status.message = message
+
+            return return_status
+
+        success, errors = DataVerification().verify_data(schema)
+
+        if not success:
+            return_status.success = False
+            return_status.http_status = 400
+            return_status.message = 'Invalid Data Recieved'
+            return_status.error.extend(errors)
+
+            return return_status
+        
+        print('verified')
+
+        with get_db_conn() as session:
+            user_result = session.query(User).filter(User.uuid == request.user_uuid).first()
+
+            if user_result is None:
+                return_status.success = False
+                return_status.http_status = 401
+                return_status.message = 'Unable To Fetch Account Data'
+
+                return return_status
+            
+            print('1')
+            
+            user_result.email = ''
+            user_result.password = ''
+            
+            user_result.first_name = ''
+            user_result.last_name = ''
+            user_result.gender = 'DELETED'
+            user_result.date_of_birth = datetime.now(UTC)
+
+            user_result.user_status = 'Closed'
+            user_result.last_activity_at = datetime.now(timezone.utc).timestamp()
+
+            print('2')
+
+            try:
+
+                session.commit()
+
+            except Exception as e:
+                print(e)
+                return None
+
+            return return_status

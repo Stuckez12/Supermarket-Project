@@ -80,5 +80,3 @@ update_data:
 delete_account:
   uuid:
     type: str_uuid
-  email:
-    type: email

@@ -60,8 +60,6 @@ message UpdateUserDetailsRequest {
 message DeleteAccountRequest {
     // user_uuid
     string user_uuid = 1;
-    // email
-    string email = 2;
 }
 
 // UserSettingsService
