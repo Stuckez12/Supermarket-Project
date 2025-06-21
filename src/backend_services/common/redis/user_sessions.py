@@ -1,13 +1,13 @@
 '''
 This file handles the creation and management
-of redis sessions that the frontend clients.
+of redis sessions used for user authentication.
 '''
 
 import json
 import uuid
 
 from datetime import datetime, timedelta, UTC
-from typing import Tuple, Union
+from typing import Tuple
 
 from src.backend_services.account.database.models import User
 from src.backend_services.common.proto.user_login_pb2 import UserData
